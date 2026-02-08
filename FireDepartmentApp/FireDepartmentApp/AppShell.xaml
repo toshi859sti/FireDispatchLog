@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell x:Class="FireDepartmentApp.AppShell"
+       xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       xmlns:local="clr-namespace:FireDepartmentApp"
+       xmlns:views="clr-namespace:FireDepartmentApp.Views"
+       Title="消防団行事管理"
+       Shell.FlyoutBehavior="Disabled">
+
+    <TabBar>
+        <!-- 団員名簿タブ - 電話番号列追加 -->
+        <Tab Title="団員名簿" Icon="person.png">
+            <ShellContent>
+                <ContentPage Title="団員名簿">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- ヘッダー -->
+                        <Grid Grid.Row="0" BackgroundColor="{StaticResource FireRed}" Padding="20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="3*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Label Grid.Column="0" Text="役職" 
+                                   FontSize="16" FontAttributes="Bold" 
+                                   TextColor="White" VerticalOptions="Center"
+                                   HorizontalTextAlignment="Center"/>
+                            <Label Grid.Column="1" Text="氏名" 
+                                   FontSize="16" FontAttributes="Bold" 
+                                   TextColor="White" VerticalOptions="Center"
+                                   HorizontalTextAlignment="Center"/>
+                            <Label Grid.Column="2" Text="電話番号" 
+                                   FontSize="16" FontAttributes="Bold" 
+                                   TextColor="White" VerticalOptions="Center"
+                                   HorizontalTextAlignment="Center"/>
+                        </Grid>
+
+                        <!-- 団員リスト -->
+                        <ScrollView Grid.Row="1">
+                            <CollectionView x:Name="MembersCollectionView" 
+                                           BackgroundColor="White">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Padding="20,12" BackgroundColor="White">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="2*"/>
+                                                <ColumnDefinition Width="2*"/>
+                                                <ColumnDefinition Width="3*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <Label Grid.Column="0" Text="{Binding Position}" 
+                                                   FontSize="14" VerticalOptions="Center"
+                                                   TextColor="{StaticResource DarkText}"
+                                                   FontAttributes="Bold"/>
+
+                                            <Entry Grid.Column="1" Text="{Binding Name}" 
+                                                   FontSize="14" BackgroundColor="Transparent"
+                                                   VerticalOptions="Center"
+                                                   TextColor="{StaticResource DarkText}"
+                                                   Placeholder="氏名を入力"/>
+
+                                            <Entry Grid.Column="2" Text="{Binding PhoneNumber}" 
+                                                   FontSize="14" BackgroundColor="Transparent"
+                                                   VerticalOptions="Center"
+                                                   TextColor="{StaticResource DarkText}"
+                                                   Placeholder="電話番号を入力"
+                                                   Keyboard="Telephone"/>
+
+                                            <!-- 区切り線 -->
+                                            <BoxView Grid.ColumnSpan="3" HeightRequest="1" 
+                                                    BackgroundColor="{StaticResource BorderColor}" 
+                                                    VerticalOptions="End" Margin="0,10,0,0"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </ScrollView>
+                    </Grid>
+                </ContentPage>
+            </ShellContent>
+        </Tab>
+
+        <!-- 行事出欠表タブ - 改良版 -->
+        <Tab Title="行事出欠表" Icon="calendar.png">
+            <ShellContent>
+                <ContentPage Title="行事出欠表">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="100"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- シンプルなヘッダー -->
+                        <StackLayout Grid.Row="0" BackgroundColor="{StaticResource FireRed}" 
+                                   Orientation="Horizontal" Padding="5" Spacing="10">
+                            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto" 
+      BackgroundColor="{StaticResource FireRed}" 
+      Padding="5" ColumnSpacing="10">
+
+                                <!-- 左寄せラベル -->
+                               
+
+                                <!-- ボタン群（右寄せ配置） -->
+                                <Button Grid.Column="0" x:Name="ExportPdfButton" Text="PDF出力" 
+            BackgroundColor="{StaticResource SuccessGreen}" 
+            TextColor="White" CornerRadius="18" 
+            FontSize="12" Padding="12,8" FontAttributes="Bold"
+            WidthRequest="80" HeightRequest="36"/>
+
+                                <Button Grid.Column="1" x:Name="SaveDataButton" Text="保存" 
+            BackgroundColor="{StaticResource WaterBlue}" 
+            TextColor="White" CornerRadius="18" 
+            FontSize="12" Padding="12,8" FontAttributes="Bold"
+            WidthRequest="60" HeightRequest="36"/>
+
+                                <Button Grid.Column="2" x:Name="AddEventButton" Text="追加" 
+            BackgroundColor="{StaticResource SafetyOrange}" 
+            TextColor="White" CornerRadius="18" 
+            FontSize="12" Padding="12,8" FontAttributes="Bold"
+            WidthRequest="60" HeightRequest="36"/>
+
+                                <Button Grid.Column="3" x:Name="EditEventButton" Text="編集" 
+            BackgroundColor="{StaticResource RescueViolet}" 
+            TextColor="White" CornerRadius="18" 
+            FontSize="12" Padding="12,8" FontAttributes="Bold"
+            WidthRequest="60" HeightRequest="36"/>
+                            </Grid>
+                        </StackLayout>
+
+                        <!-- 出欠表メイン（固定列対応） -->
+                        <Grid Grid.Row="1">
+                            <ScrollView Orientation="Vertical">
+                            <Grid ColumnDefinitions="100,*,60,60">
+                                <!-- 氏名列 -->
+                                <Border Grid.Column="0" Stroke="{StaticResource BorderColor}" StrokeThickness="1">
+                                    <Grid x:Name="NamesGrid" BackgroundColor="{StaticResource LightGray}" />
+                                </Border>
+
+                                <!-- 行事列（横スクロールが必要なら内部にもう1つ ScrollView） -->
+                                <Border Grid.Column="1" Stroke="{StaticResource BorderColor}" StrokeThickness="1">
+                                    <ScrollView Orientation="Horizontal">
+                                        <Grid x:Name="EventsGrid" BackgroundColor="White" MinimumWidthRequest="60" />
+                                    </ScrollView>
+                                </Border>
+
+                                <!-- 出動回数 -->
+                                <Border Grid.Column="2" Stroke="{StaticResource BorderColor}" StrokeThickness="1">
+                                    <Grid x:Name="CountGrid" BackgroundColor="{StaticResource LightGray}" />
+                                </Border>
+
+                                <!-- 手当指数 -->
+                                <Border Grid.Column="3" Stroke="{StaticResource BorderColor}" StrokeThickness="1">
+                                    <Grid x:Name="AllowanceGrid" BackgroundColor="{StaticResource LightGray}" />
+                                </Border>
+                            </Grid>
+                            </ScrollView>
+                        </Grid>
+                    </Grid>
+                </ContentPage>
+            </ShellContent>
+        </Tab>
+    </TabBar>
+</Shell>

@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<Application x:Class="FireDepartmentApp.App"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <!-- 消防団カラーテーマ -->
+            <Color x:Key="FireRed">#FF6B6B</Color>
+            <Color x:Key="WaterBlue">#4ECDC4</Color>
+            <Color x:Key="SafetyOrange">#FF9F43</Color>
+            <Color x:Key="RescueViolet">#6C5CE7</Color>
+            <Color x:Key="SuccessGreen">#27AE60</Color>
+            <Color x:Key="DangerRed">#E74C3C</Color>
+            <Color x:Key="NeutralGray">#95A5A6</Color>
+            <Color x:Key="LightGray">#F8F9FA</Color>
+            <Color x:Key="DarkText">#2C3E50</Color>
+            <Color x:Key="BorderColor">#DDD</Color>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

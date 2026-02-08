@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="FireDepartmentApp.Views.EventEditPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             Title="行事編集"
+             BackgroundColor="{StaticResource LightGray}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- ヘッダー -->
+        <Grid Grid.Row="0" BackgroundColor="{StaticResource FireRed}" Padding="20">
+            <Label Text="行事編集" FontSize="24" FontAttributes="Bold" 
+                   TextColor="White" HorizontalOptions="Center"/>
+        </Grid>
+
+        <!-- メインコンテンツ -->
+        <ScrollView Grid.Row="1" Padding="20">
+            <StackLayout Spacing="25">
+
+                <!-- 行事情報入力 -->
+                <Border BackgroundColor="White" StrokeShape="RoundRectangle 15" 
+                        Padding="25" StrokeThickness="0">
+                    <StackLayout Spacing="20">
+
+                        <StackLayout>
+                            <Label Text="日付" FontSize="16" FontAttributes="Bold" 
+                                   TextColor="{StaticResource DarkText}"/>
+                            <DatePicker x:Name="DatePicker" 
+                                       BackgroundColor="{StaticResource LightGray}"
+                                       Format="yyyy年MM月dd日"
+                                       FontSize="16"/>
+                        </StackLayout>
+
+                        <StackLayout>
+                            <Label Text="行事名" FontSize="16" FontAttributes="Bold" 
+                                   TextColor="{StaticResource DarkText}"/>
+                            <Entry x:Name="EventNameEntry" 
+                                   Placeholder="行事名を入力してください"
+                                   BackgroundColor="{StaticResource LightGray}"
+                                   FontSize="16"
+                                   PlaceholderColor="#999"/>
+                        </StackLayout>
+
+                        <StackLayout>
+                            <Label Text="手当指数" FontSize="16" FontAttributes="Bold" 
+                                   TextColor="{StaticResource DarkText}"/>
+                            <Entry x:Name="AllowanceIndexEntry" 
+                                   Placeholder="手当指数を入力してください"
+                                   Keyboard="Numeric"
+                                   BackgroundColor="{StaticResource LightGray}"
+                                   FontSize="16"
+                                   PlaceholderColor="#999"/>
+                        </StackLayout>
+                    </StackLayout>
+                </Border>
+
+                <!-- 出席者選択 -->
+                <Border BackgroundColor="White" StrokeShape="RoundRectangle 15" 
+                        Padding="25" StrokeThickness="0">
+                    <StackLayout Spacing="20">
+                        <Label Text="出席者" FontSize="18" FontAttributes="Bold" 
+                               TextColor="{StaticResource DarkText}"/>
+                        <Label Text="団員名をタップして出席・欠席を切り替えます" 
+                               FontSize="13" TextColor="#7F8C8D"/>
+
+                        <!-- 団員選択グリッド -->
+                        <Grid x:Name="MembersGrid" RowSpacing="10" ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                        </Grid>
+                    </StackLayout>
+                </Border>
+            </StackLayout>
+        </ScrollView>
+
+        <!-- フッターボタン -->
+        <Grid Grid.Row="2" BackgroundColor="White" Padding="20" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" x:Name="DeleteButton" Text="削除" 
+                   BackgroundColor="{StaticResource DangerRed}" 
+                   TextColor="White"
+                   CornerRadius="25" HeightRequest="50" 
+                   FontSize="14" FontAttributes="Bold"
+                   IsVisible="False"/>
+
+            <Button Grid.Column="1" x:Name="CancelButton" Text="中止" 
+                   BackgroundColor="{StaticResource NeutralGray}" 
+                   TextColor="White"
+                   CornerRadius="25" HeightRequest="50" 
+                   FontSize="14" FontAttributes="Bold"/>
+
+            <Button Grid.Column="3" x:Name="SaveButton" Text="決定" 
+                   BackgroundColor="{StaticResource SuccessGreen}" 
+                   TextColor="White"
+                   CornerRadius="25" HeightRequest="50" 
+                   FontSize="14" FontAttributes="Bold"/>
+        </Grid>
+    </Grid>
+</ContentPage>
