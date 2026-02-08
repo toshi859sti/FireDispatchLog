@@ -24,5 +24,6 @@ class SettingsRepository(private val appSettingsDao: AppSettingsDao) {
     companion object {
         const val KEY_FISCAL_YEAR = "fiscal_year"
         const val KEY_ORGANIZATION_NAME = "organization_name"
+        const val KEY_ALLOW_PHONE_CALL = "allow_phone_call"
     }
 }

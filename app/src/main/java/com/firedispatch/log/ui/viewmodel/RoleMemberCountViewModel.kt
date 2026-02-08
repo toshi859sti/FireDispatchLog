@@ -27,6 +27,9 @@ class RoleMemberCountViewModel(application: Application) : AndroidViewModel(appl
     private val _totalCount = MutableStateFlow(0)
     val totalCount: StateFlow<Int> = _totalCount.asStateFlow()
 
+    private val _targetCount = MutableStateFlow(11)
+    val targetCount: StateFlow<Int> = _targetCount.asStateFlow()
+
     private val _isValid = MutableStateFlow(false)
     val isValid: StateFlow<Boolean> = _isValid.asStateFlow()
 
@@ -73,10 +76,15 @@ class RoleMemberCountViewModel(application: Application) : AndroidViewModel(appl
         }
     }
 
+    fun setTargetCount(count: Int) {
+        _targetCount.value = count.coerceIn(5, 11)
+        updateTotalAndValidation()
+    }
+
     private fun updateTotalAndValidation() {
         val total = _roleCounts.value.sumOf { it.count }
         _totalCount.value = total
-        _isValid.value = (total == 11)
+        _isValid.value = (total == _targetCount.value)
     }
 
     fun saveCounts(onSuccess: () -> Unit, onError: () -> Unit) {

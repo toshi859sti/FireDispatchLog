@@ -1,6 +1,9 @@
 package com.firedispatch.log.ui.screen
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,11 +11,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -23,6 +28,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.sp
+import com.firedispatch.log.ui.components.LiquidGlassBackground
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -46,43 +55,77 @@ fun MemberEditScreen(
     val editRows by viewModel.editRows.collectAsState()
     var showErrorDialog by remember { mutableStateOf(false) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("名簿編集") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+    LiquidGlassBackground(
+        modifier = Modifier.fillMaxSize(),
+        primaryColor = Color(0xFFFF5722),  // ディープオレンジ
+        secondaryColor = Color(0xFFFF9800), // オレンジ
+        tertiaryColor = Color(0xFFE53935),  // 赤
+        animated = true
+    ) {
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                // 不透明なTopAppBar
+                TopAppBar(
+                    title = {
+                        Text(
+                            "名簿編集",
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { navController.navigateUp() }) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "戻る",
+                                tint = Color.Black
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.White.copy(alpha = 0.9f)
+                    )
                 )
-            )
-        }
-    ) { paddingValues ->
+            }
+        ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // 登録ボタン
-            Button(
-                onClick = {
-                    if (viewModel.hasInvalidRows()) {
-                        showErrorDialog = true
-                    } else {
-                        viewModel.saveMembers {
-                            navController.navigateUp()
-                        }
-                    }
-                },
+            // 登録ボタン（ガラススタイル）
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.White.copy(alpha = 0.5f))
+                    .border(
+                        width = 1.dp,
+                        color = Color.White.copy(alpha = 0.4f),
+                        shape = RoundedCornerShape(16.dp)
+                    )
             ) {
-                Text("登録")
+                Button(
+                    onClick = {
+                        if (viewModel.hasInvalidRows()) {
+                            showErrorDialog = true
+                        } else {
+                            viewModel.saveMembers {
+                                navController.navigateUp()
+                            }
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = Color.Black
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text("登録", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                }
             }
 
             // ヘッダー
@@ -94,14 +137,16 @@ fun MemberEditScreen(
             ) {
                 Text(
                     text = "氏名",
-                    style = MaterialTheme.typography.titleSmall,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
+                    color = Color.Black,
                     modifier = Modifier.weight(1f)
                 )
                 Text(
                     text = "電話番号",
-                    style = MaterialTheme.typography.titleSmall,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
+                    color = Color.Black,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -126,6 +171,7 @@ fun MemberEditScreen(
                     )
                 }
             }
+        }
         }
     }
 
@@ -158,17 +204,31 @@ fun MemberEditRow(
         OutlinedTextField(
             value = name,
             onValueChange = onNameChange,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .background(Color.White.copy(alpha = 0.95f), RoundedCornerShape(8.dp)),
             singleLine = true,
-            placeholder = { Text("${index + 1}") }
+            placeholder = { Text("${index + 1}", fontSize = 20.sp) },
+            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 20.sp),
+            colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = Color.White.copy(alpha = 0.95f),
+                unfocusedContainerColor = Color.White.copy(alpha = 0.95f)
+            )
         )
         OutlinedTextField(
             value = phoneNumber,
             onValueChange = onPhoneNumberChange,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .background(Color.White.copy(alpha = 0.95f), RoundedCornerShape(8.dp)),
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-            placeholder = { Text("-") }
+            placeholder = { Text("-", fontSize = 20.sp) },
+            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 20.sp),
+            colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = Color.White.copy(alpha = 0.95f),
+                unfocusedContainerColor = Color.White.copy(alpha = 0.95f)
+            )
         )
     }
 }

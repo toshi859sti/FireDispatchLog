@@ -24,6 +24,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private val _organizationName = MutableStateFlow("")
     val organizationName: StateFlow<String> = _organizationName.asStateFlow()
 
+    private val _allowPhoneCall = MutableStateFlow(false)
+    val allowPhoneCall: StateFlow<Boolean> = _allowPhoneCall.asStateFlow()
+
     init {
         loadSettings()
     }
@@ -44,6 +47,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 }
             }
         }
+
+        viewModelScope.launch {
+            settingsRepository.getSetting(SettingsRepository.KEY_ALLOW_PHONE_CALL).collect { setting ->
+                _allowPhoneCall.value = setting?.value == "true"
+            }
+        }
     }
 
     private fun getCurrentFiscalYear(): Int {
@@ -61,6 +70,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         _organizationName.value = name
     }
 
+    fun setAllowPhoneCall(allow: Boolean) {
+        _allowPhoneCall.value = allow
+    }
+
     fun saveSettings(onComplete: () -> Unit) {
         viewModelScope.launch {
             settingsRepository.insertSetting(
@@ -70,6 +83,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             settingsRepository.insertSetting(
                 SettingsRepository.KEY_ORGANIZATION_NAME,
                 _organizationName.value
+            )
+            settingsRepository.insertSetting(
+                SettingsRepository.KEY_ALLOW_PHONE_CALL,
+                _allowPhoneCall.value.toString()
             )
             onComplete()
         }

@@ -1,19 +1,27 @@
 package com.firedispatch.log.ui.screen
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -21,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -34,12 +43,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.firedispatch.log.ui.components.LiquidGlassBackground
 import com.firedispatch.log.ui.viewmodel.RoleCountItem
 import com.firedispatch.log.ui.viewmodel.RoleMemberCountViewModel
 
@@ -51,68 +68,156 @@ fun RoleMemberCountSettingScreen(
 ) {
     val roleCounts by viewModel.roleCounts.collectAsState()
     val totalCount by viewModel.totalCount.collectAsState()
+    val targetCount by viewModel.targetCount.collectAsState()
     val isValid by viewModel.isValid.collectAsState()
     var showErrorDialog by remember { mutableStateOf(false) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("一般団員数設定") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+    LiquidGlassBackground(
+        modifier = Modifier.fillMaxSize(),
+        primaryColor = Color(0xFFFF5722),  // ディープオレンジ
+        secondaryColor = Color(0xFFFF9800), // オレンジ
+        tertiaryColor = Color(0xFFE53935),  // 赤
+        animated = true
+    ) {
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            "一般団員数設定",
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { navController.navigateUp() }) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "戻る",
+                                tint = Color.Black
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.White.copy(alpha = 0.9f)
+                    )
                 )
-            )
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            // 合計表示
-            Card(
+            }
+        ) { paddingValues ->
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = if (isValid) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.errorContainer
-                    }
-                )
+                    .fillMaxSize()
+                    .padding(paddingValues)
             ) {
-                Column(
+                // 合計表示（ガラススタイル）
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "合計",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "$totalCount / 11",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    if (!isValid) {
-                        Text(
-                            text = "合計を11にしてください",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error
+                        .padding(16.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(
+                            if (isValid) {
+                                Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color.White.copy(alpha = 0.4f),
+                                        Color.White.copy(alpha = 0.6f)
+                                    )
+                                )
+                            } else {
+                                Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color(0xFFE11D48).copy(alpha = 0.3f),
+                                        Color(0xFFE11D48).copy(alpha = 0.5f)
+                                    )
+                                )
+                            }
                         )
+                        .graphicsLayer {
+                            shadowElevation = 10.dp.toPx()
+                            shape = RoundedCornerShape(20.dp)
+                            ambientShadowColor = Color.Black.copy(alpha = 0.15f)
+                            spotShadowColor = Color.Black.copy(alpha = 0.2f)
+                        }
+                        .border(
+                            width = 1.dp,
+                            color = Color.White.copy(alpha = 0.4f),
+                            shape = RoundedCornerShape(20.dp)
+                        )
+                        .padding(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            text = "合計",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                        Text(
+                            text = "$totalCount / $targetCount",
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+
+                        // 目標数設定
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = "目標:",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black
+                            )
+                            Button(
+                                onClick = { viewModel.setTargetCount(targetCount - 1) },
+                                modifier = Modifier.size(40.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFFE11D48),
+                                    contentColor = Color.White
+                                ),
+                                shape = RoundedCornerShape(10.dp),
+                                enabled = targetCount > 5
+                            ) {
+                                Text("-", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                            }
+                            Text(
+                                text = "$targetCount",
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black,
+                                modifier = Modifier.width(50.dp),
+                                textAlign = TextAlign.Center
+                            )
+                            Button(
+                                onClick = { viewModel.setTargetCount(targetCount + 1) },
+                                modifier = Modifier.size(40.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFFE11D48),
+                                    contentColor = Color.White
+                                ),
+                                shape = RoundedCornerShape(10.dp),
+                                enabled = targetCount < 11
+                            ) {
+                                Text("+", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+
+                        if (!isValid) {
+                            Text(
+                                text = "合計を${targetCount}にしてください",
+                                fontSize = 14.sp,
+                                color = Color(0xFFE11D48)
+                            )
+                        }
                     }
                 }
-            }
 
             // 団員数設定リスト
             LazyColumn(
@@ -130,20 +235,45 @@ fun RoleMemberCountSettingScreen(
                 }
             }
 
-            // 登録ボタン
-            Button(
-                onClick = {
-                    viewModel.saveCounts(
-                        onSuccess = { navController.navigateUp() },
-                        onError = { showErrorDialog = true }
-                    )
-                },
-                enabled = isValid,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Text("登録")
+                // 登録ボタン（ガラススタイル）
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            if (isValid) {
+                                Color.White.copy(alpha = 0.5f)
+                            } else {
+                                Color.Gray.copy(alpha = 0.3f)
+                            }
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = Color.White.copy(alpha = 0.4f),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                ) {
+                    Button(
+                        onClick = {
+                            viewModel.saveCounts(
+                                onSuccess = { navController.navigateUp() },
+                                onError = { showErrorDialog = true }
+                            )
+                        },
+                        enabled = isValid,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color.Black,
+                            disabledContainerColor = Color.Transparent,
+                            disabledContentColor = Color.Gray
+                        ),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text("登録", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    }
+                }
             }
         }
     }
@@ -167,51 +297,116 @@ fun RoleCountItem(
     item: RoleCountItem,
     onCountChange: (Int) -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(80.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color.White.copy(alpha = 0.35f),
+                        Color.White.copy(alpha = 0.55f)
+                    )
+                )
+            )
+            .graphicsLayer {
+                shadowElevation = 10.dp.toPx()
+                shape = RoundedCornerShape(20.dp)
+                ambientShadowColor = Color.Black.copy(alpha = 0.15f)
+                spotShadowColor = Color.Black.copy(alpha = 0.2f)
+            }
+            .drawBehind {
+                val stroke = 1.dp.toPx()
+                drawLine(
+                    color = Color.White.copy(alpha = 0.35f),
+                    start = Offset(0f, size.height - stroke),
+                    end = Offset(size.width, size.height - stroke),
+                    strokeWidth = stroke
+                )
+            }
+            .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = item.roleType.displayName,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f)
-            )
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            // 役職バッジ
+            Box(
+                modifier = Modifier
+                    .width(90.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Color(0xFFE11D48))
+                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Button(
-                    onClick = { onCountChange(item.count - 1) },
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Text("-", style = MaterialTheme.typography.titleLarge)
-                }
-
-                OutlinedTextField(
-                    value = item.count.toString(),
-                    onValueChange = { newValue ->
-                        newValue.toIntOrNull()?.let { onCountChange(it) }
-                    },
-                    modifier = Modifier.size(width = 80.dp, height = 56.dp),
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(textAlign = TextAlign.Center),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                Text(
+                    text = item.roleType.displayName,
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
                 )
+            }
 
-                Button(
-                    onClick = { onCountChange(item.count + 1) },
-                    modifier = Modifier.size(48.dp)
+            Spacer(modifier = Modifier.width(12.dp))
+
+            // カウンター部分（ベージュ背景）
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Color(0xFFFFF3E8).copy(alpha = 0.85f))
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("+", style = MaterialTheme.typography.titleLarge)
+                    Button(
+                        onClick = { onCountChange(item.count - 1) },
+                        modifier = Modifier.size(44.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFE11D48),
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("-", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    }
+
+                    OutlinedTextField(
+                        value = item.count.toString(),
+                        onValueChange = { newValue ->
+                            newValue.toIntOrNull()?.let { onCountChange(it) }
+                        },
+                        modifier = Modifier
+                            .size(width = 70.dp, height = 56.dp)
+                            .background(Color.White.copy(alpha = 0.95f), RoundedCornerShape(8.dp)),
+                        textStyle = androidx.compose.ui.text.TextStyle(
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = Color.White.copy(alpha = 0.95f),
+                            unfocusedContainerColor = Color.White.copy(alpha = 0.95f)
+                        )
+                    )
+
+                    Button(
+                        onClick = { onCountChange(item.count + 1) },
+                        modifier = Modifier.size(44.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFE11D48),
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("+", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         }

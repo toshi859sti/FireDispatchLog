@@ -62,7 +62,14 @@ class MemberEditViewModel(application: Application) : AndroidViewModel(applicati
         if (index in currentRows.indices) {
             val row = currentRows[index]
             currentRows[index] = row.copy(name = name, phoneNumber = phoneNumber)
-            _editRows.value = currentRows
+
+            // 50音順にソート（空行は後ろに）
+            val collator = Collator.getInstance(Locale.JAPANESE)
+            val nonEmptyRows = currentRows.filter { it.name.isNotBlank() }
+                .sortedWith(compareBy(collator) { it.name })
+            val emptyRows = currentRows.filter { it.name.isBlank() }
+
+            _editRows.value = nonEmptyRows + emptyRows
         }
     }
 

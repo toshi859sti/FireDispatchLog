@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,11 +18,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -32,6 +35,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import com.firedispatch.log.ui.components.GlassCard
+import com.firedispatch.log.ui.components.LiquidGlassBackground
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,6 +45,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -89,22 +95,39 @@ fun DispatchTableScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("出動表") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+    LiquidGlassBackground(
+        modifier = Modifier.fillMaxSize(),
+        primaryColor = Color(0xFF000000),  // 黒
+        secondaryColor = Color(0xFFFF0000), // 赤
+        tertiaryColor = Color(0xFFFFFF00),  // 黄色
+        animated = true
+    ) {
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            "出動表",
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { navController.navigateUp() }) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "戻る",
+                                tint = Color.Black
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.White.copy(alpha = 0.9f)
+                    )
                 )
-            )
-        }
-    ) { paddingValues ->
+            }
+        ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -114,11 +137,11 @@ fun DispatchTableScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp)
+                    .padding(16.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Button(
                         onClick = {
@@ -127,28 +150,83 @@ fun DispatchTableScreen(
                             }
                         },
                         enabled = selectedEventId != null,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(
+                                if (selectedEventId != null) {
+                                    Color.White.copy(alpha = 0.5f)
+                                } else {
+                                    Color.Gray.copy(alpha = 0.3f)
+                                }
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = Color.White.copy(alpha = 0.4f),
+                                shape = RoundedCornerShape(16.dp)
+                            ),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color.Black,
+                            disabledContainerColor = Color.Transparent,
+                            disabledContentColor = Color.Gray
+                        ),
+                        shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("編集", fontSize = 12.sp)
+                        Text("編集", fontSize = 14.sp, fontWeight = FontWeight.Bold)
                     }
                     Button(
                         onClick = { navController.navigate(Screen.EventEdit.createRoute(-1)) },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color.White.copy(alpha = 0.5f))
+                            .border(
+                                width = 1.dp,
+                                color = Color.White.copy(alpha = 0.4f),
+                                shape = RoundedCornerShape(16.dp)
+                            ),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color.Black
+                        ),
+                        shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("追加", fontSize = 12.sp)
+                        Text("追加", fontSize = 14.sp, fontWeight = FontWeight.Bold)
                     }
                     Button(
                         onClick = { showDeleteDialog = true },
                         enabled = selectedEventId != null,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(
+                                if (selectedEventId != null) {
+                                    Color.White.copy(alpha = 0.5f)
+                                } else {
+                                    Color.Gray.copy(alpha = 0.3f)
+                                }
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = Color.White.copy(alpha = 0.4f),
+                                shape = RoundedCornerShape(16.dp)
+                            ),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color.Black,
+                            disabledContainerColor = Color.Transparent,
+                            disabledContentColor = Color.Gray
+                        ),
+                        shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("削除", fontSize = 12.sp)
+                        Text("削除", fontSize = 14.sp, fontWeight = FontWeight.Bold)
                     }
                 }
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(
@@ -159,7 +237,7 @@ fun DispatchTableScreen(
                             checked = showSummary,
                             onCheckedChange = { viewModel.toggleShowSummary() }
                         )
-                        Text("合計表示", fontSize = 12.sp)
+                        Text("合計表示", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.Black)
                     }
 
                     Row(
@@ -170,29 +248,51 @@ fun DispatchTableScreen(
                             checked = showCurrentYearOnly,
                             onCheckedChange = { viewModel.toggleShowCurrentYearOnly() }
                         )
-                        Text("今年度のみ", fontSize = 12.sp)
+                        Text("今年度のみ", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.Black)
                     }
 
                     Button(
                         onClick = { pdfExportLauncher.launch("出動表_$timestamp.pdf") },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color.White.copy(alpha = 0.5f))
+                            .border(
+                                width = 1.dp,
+                                color = Color.White.copy(alpha = 0.4f),
+                                shape = RoundedCornerShape(16.dp)
+                            ),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color.Black
+                        ),
+                        shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("PDF出力", fontSize = 12.sp)
+                        Text("PDF出力", fontSize = 14.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
 
-            // グリッド表示
-            DispatchTableGrid(
-                memberRows = memberRows,
-                eventColumns = eventColumns,
-                attendanceSummaries = attendanceSummaries,
-                showSummary = showSummary,
-                selectedEventId = selectedEventId,
-                onEventSelect = { eventId ->
-                    viewModel.selectEvent(if (selectedEventId == eventId) null else eventId)
-                }
-            )
+            // グリッド表示 - ガラススタイル
+            GlassCard(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp),
+                radius = 20.dp,
+                baseAlpha = 0.35f
+            ) {
+                DispatchTableGrid(
+                    memberRows = memberRows,
+                    eventColumns = eventColumns,
+                    attendanceSummaries = attendanceSummaries,
+                    showSummary = showSummary,
+                    selectedEventId = selectedEventId,
+                    onEventSelect = { eventId ->
+                        viewModel.selectEvent(if (selectedEventId == eventId) null else eventId)
+                    }
+                )
+            }
+        }
         }
     }
 
@@ -233,14 +333,23 @@ fun DispatchTableGrid(
     selectedEventId: Long?,
     onEventSelect: (Long) -> Unit
 ) {
-    val horizontalScrollState = rememberScrollState()
-    val verticalScrollState = rememberScrollState()
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val horizontalScrollState = rememberScrollState()
+        val verticalScrollState = rememberScrollState()
 
-    val cellHeight = 36.dp
-    val headerHeight = 60.dp
-    val nameColumnWidth = 100.dp
-    val summaryColumnWidth = 60.dp
-    val eventColumnWidth = 80.dp
+        val headerHeight = 60.dp
+        val nameColumnWidth = 95.dp  // やや広く
+        val summaryColumnWidth = 60.dp
+        val eventColumnWidth = 80.dp
+
+        // 利用可能な高さからヘッダー高さを引いて、行数で割る
+        val availableHeight = maxHeight
+        val rowCount = memberRows.size
+        val cellHeight = if (rowCount > 0) {
+            ((availableHeight - headerHeight) / rowCount).coerceAtLeast(30.dp)
+        } else {
+            36.dp
+        }
 
     // .NET MAUIと同じ配色
     val tealColor = Color(0xFF4ECDC4)
@@ -273,7 +382,7 @@ fun DispatchTableGrid(
                     Text(
                         text = "氏名",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp,
+                        fontSize = 14.sp,
                         color = Color.White
                     )
                 }
@@ -316,12 +425,12 @@ fun DispatchTableGrid(
                                     Text(
                                         text = "$dateStr [${eventColumn.event.allowanceIndex}]",
                                         fontWeight = FontWeight.Bold,
-                                        fontSize = 10.sp,
+                                        fontSize = 15.sp,
                                         color = Color.White
                                     )
                                     Text(
                                         text = eventColumn.event.eventName,
-                                        fontSize = 10.sp,
+                                        fontSize = 14.sp,
                                         color = Color.White,
                                         textAlign = TextAlign.Center,
                                         maxLines = 2
@@ -355,10 +464,10 @@ fun DispatchTableGrid(
                             Text(
                                 text = "出動\n回数",
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 11.sp,
+                                fontSize = 14.sp,
                                 color = Color.White,
                                 textAlign = TextAlign.Center,
-                                lineHeight = 14.sp
+                                lineHeight = 17.sp
                             )
                         }
                     }
@@ -381,10 +490,10 @@ fun DispatchTableGrid(
                             Text(
                                 text = "手当\n指数",
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 11.sp,
+                                fontSize = 14.sp,
                                 color = Color.White,
                                 textAlign = TextAlign.Center,
-                                lineHeight = 14.sp
+                                lineHeight = 17.sp
                             )
                         }
                     }
@@ -545,5 +654,6 @@ fun DispatchTableGrid(
                 }
             }
         }
+    }
     }
 }

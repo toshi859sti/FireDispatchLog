@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -57,6 +58,7 @@ fun SettingsScreen(
     val context = LocalContext.current
     val fiscalYear by viewModel.fiscalYear.collectAsState()
     val organizationName by viewModel.organizationName.collectAsState()
+    val allowPhoneCall by viewModel.allowPhoneCall.collectAsState()
     var showResetDialog by remember { mutableStateOf(false) }
     var showSaveDialog by remember { mutableStateOf(false) }
 
@@ -201,6 +203,39 @@ fun SettingsScreen(
                         label = { Text("分団名") },
                         placeholder = { Text("例: ○○市消防団第1分団") },
                         singleLine = true
+                    )
+                }
+            }
+
+            // 電話発信許可設定
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = "名簿から電話発信を許可",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "団員名簿の電話番号をタップして電話をかけられます",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = allowPhoneCall,
+                        onCheckedChange = { viewModel.setAllowPhoneCall(it) }
                     )
                 }
             }

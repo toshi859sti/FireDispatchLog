@@ -82,6 +82,8 @@ class RoleAssignmentViewModel(application: Application) : AndroidViewModel(appli
 
     fun assignMember(roleType: RoleType, position: Int, memberId: Long) {
         viewModelScope.launch {
+            // 既存の割り当てを削除してから新しいものを追加
+            roleRepository.deleteRoleAssignment(roleType.name, position)
             val assignment = RoleAssignment(
                 roleType = roleType.name,
                 memberId = memberId,
