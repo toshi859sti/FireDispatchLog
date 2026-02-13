@@ -3,6 +3,7 @@ package com.firedispatch.log.data.backup
 import android.content.Context
 import android.net.Uri
 import com.firedispatch.log.data.database.AppDatabase
+import com.firedispatch.log.data.repository.AccountingRepository
 import com.firedispatch.log.data.repository.EventRepository
 import com.firedispatch.log.data.repository.MemberRepository
 import com.firedispatch.log.data.repository.RoleRepository
@@ -20,6 +21,11 @@ class BackupManager(context: Context) {
     private val roleRepository = RoleRepository(database.roleAssignmentDao(), database.roleMemberCountDao())
     private val eventRepository = EventRepository(database.eventDao(), database.attendanceDao())
     private val settingsRepository = SettingsRepository(database.appSettingsDao())
+    private val accountingRepository = AccountingRepository(
+        database.fiscalYearDao(),
+        database.accountCategoryDao(),
+        database.transactionDao()
+    )
 
     suspend fun exportBackup(uri: Uri, context: Context): Result<Unit> = withContext(Dispatchers.IO) {
         try {
@@ -41,13 +47,31 @@ class BackupManager(context: Context) {
                 settingsRepository.getSetting(SettingsRepository.KEY_ORGANIZATION_NAME).first()
             ).filterNotNull()
 
+            // 会計データを取得
+            val fiscalYears = accountingRepository.allFiscalYears.first()
+            val incomeCategories = accountingRepository.getCategoriesByType(1).first()
+            val expenseCategories = accountingRepository.getCategoriesByType(0).first()
+            val accountCategories = incomeCategories + expenseCategories
+
+            val allSubCategories = mutableListOf<com.firedispatch.log.data.entity.AccountSubCategory>()
+            accountCategories.forEach { category ->
+                val subCategories = accountingRepository.getSubCategoriesByParent(category.id).first()
+                allSubCategories.addAll(subCategories)
+            }
+
+            val allTransactions = accountingRepository.allTransactions.first()
+
             val backupData = BackupData(
                 members = members,
                 roleAssignments = roleAssignments,
                 roleMemberCounts = roleMemberCounts,
                 events = events,
                 attendances = allAttendances,
-                settings = settings
+                settings = settings,
+                fiscalYears = fiscalYears,
+                accountCategories = accountCategories,
+                accountSubCategories = allSubCategories,
+                transactions = allTransactions
             )
 
             val json = backupDataToJson(backupData)
@@ -93,6 +117,12 @@ class BackupManager(context: Context) {
             backupData.settings.forEach { setting ->
                 settingsRepository.insertSetting(setting.key, setting.value)
             }
+
+            // 会計データを復元
+            accountingRepository.insertFiscalYears(backupData.fiscalYears)
+            accountingRepository.insertCategories(backupData.accountCategories)
+            accountingRepository.insertSubCategories(backupData.accountSubCategories)
+            accountingRepository.insertTransactions(backupData.transactions)
 
             Result.success(Unit)
         } catch (e: Exception) {
@@ -171,6 +201,65 @@ class BackupManager(context: Context) {
             settingsArray.put(settingJson)
         }
         json.put("settings", settingsArray)
+
+        // FiscalYears
+        val fiscalYearsArray = JSONArray()
+        backupData.fiscalYears.forEach { fiscalYear ->
+            val fiscalYearJson = JSONObject()
+            fiscalYearJson.put("id", fiscalYear.id)
+            fiscalYearJson.put("year", fiscalYear.year)
+            fiscalYearJson.put("startDate", fiscalYear.startDate)
+            fiscalYearJson.put("endDate", fiscalYear.endDate)
+            fiscalYearJson.put("carryOver", fiscalYear.carryOver)
+            fiscalYearJson.put("isActive", fiscalYear.isActive)
+            fiscalYearsArray.put(fiscalYearJson)
+        }
+        json.put("fiscalYears", fiscalYearsArray)
+
+        // AccountCategories
+        val categoriesArray = JSONArray()
+        backupData.accountCategories.forEach { category ->
+            val categoryJson = JSONObject()
+            categoryJson.put("id", category.id)
+            categoryJson.put("sortOrder", category.sortOrder)
+            categoryJson.put("name", category.name)
+            categoryJson.put("isIncome", category.isIncome)
+            categoryJson.put("isEditable", category.isEditable)
+            categoryJson.put("outputOrder", category.outputOrder)
+            categoriesArray.put(categoryJson)
+        }
+        json.put("accountCategories", categoriesArray)
+
+        // AccountSubCategories
+        val subCategoriesArray = JSONArray()
+        backupData.accountSubCategories.forEach { subCategory ->
+            val subCategoryJson = JSONObject()
+            subCategoryJson.put("id", subCategory.id)
+            subCategoryJson.put("parentId", subCategory.parentId)
+            subCategoryJson.put("sortOrder", subCategory.sortOrder)
+            subCategoryJson.put("name", subCategory.name)
+            subCategoryJson.put("isEditable", subCategory.isEditable)
+            subCategoryJson.put("outputOrder", subCategory.outputOrder)
+            subCategoriesArray.put(subCategoryJson)
+        }
+        json.put("accountSubCategories", subCategoriesArray)
+
+        // Transactions
+        val transactionsArray = JSONArray()
+        backupData.transactions.forEach { transaction ->
+            val transactionJson = JSONObject()
+            transactionJson.put("id", transaction.id)
+            transactionJson.put("fiscalYearId", transaction.fiscalYearId)
+            transactionJson.put("isIncome", transaction.isIncome)
+            transactionJson.put("date", transaction.date)
+            transactionJson.put("categoryId", transaction.categoryId)
+            transactionJson.put("subCategoryId", transaction.subCategoryId ?: JSONObject.NULL)
+            transactionJson.put("amount", transaction.amount)
+            transactionJson.put("memo", transaction.memo)
+            transactionJson.put("createdAt", transaction.createdAt)
+            transactionsArray.put(transactionJson)
+        }
+        json.put("transactions", transactionsArray)
 
         return json.toString(2)
     }
@@ -257,6 +346,82 @@ class BackupManager(context: Context) {
             )
         }
 
+        // 会計データ（バージョン2以降のみ）
+        val fiscalYears = mutableListOf<com.firedispatch.log.data.entity.FiscalYear>()
+        if (json.has("fiscalYears")) {
+            val fiscalYearsArray = json.getJSONArray("fiscalYears")
+            for (i in 0 until fiscalYearsArray.length()) {
+                val fiscalYearJson = fiscalYearsArray.getJSONObject(i)
+                fiscalYears.add(
+                    com.firedispatch.log.data.entity.FiscalYear(
+                        id = fiscalYearJson.getLong("id"),
+                        year = fiscalYearJson.getInt("year"),
+                        startDate = fiscalYearJson.getLong("startDate"),
+                        endDate = fiscalYearJson.getLong("endDate"),
+                        carryOver = fiscalYearJson.getInt("carryOver"),
+                        isActive = fiscalYearJson.getInt("isActive")
+                    )
+                )
+            }
+        }
+
+        val accountCategories = mutableListOf<com.firedispatch.log.data.entity.AccountCategory>()
+        if (json.has("accountCategories")) {
+            val categoriesArray = json.getJSONArray("accountCategories")
+            for (i in 0 until categoriesArray.length()) {
+                val categoryJson = categoriesArray.getJSONObject(i)
+                accountCategories.add(
+                    com.firedispatch.log.data.entity.AccountCategory(
+                        id = categoryJson.getLong("id"),
+                        sortOrder = categoryJson.getInt("sortOrder"),
+                        name = categoryJson.getString("name"),
+                        isIncome = categoryJson.getInt("isIncome"),
+                        isEditable = categoryJson.getInt("isEditable"),
+                        outputOrder = categoryJson.getInt("outputOrder")
+                    )
+                )
+            }
+        }
+
+        val accountSubCategories = mutableListOf<com.firedispatch.log.data.entity.AccountSubCategory>()
+        if (json.has("accountSubCategories")) {
+            val subCategoriesArray = json.getJSONArray("accountSubCategories")
+            for (i in 0 until subCategoriesArray.length()) {
+                val subCategoryJson = subCategoriesArray.getJSONObject(i)
+                accountSubCategories.add(
+                    com.firedispatch.log.data.entity.AccountSubCategory(
+                        id = subCategoryJson.getLong("id"),
+                        parentId = subCategoryJson.getLong("parentId"),
+                        sortOrder = subCategoryJson.getInt("sortOrder"),
+                        name = subCategoryJson.getString("name"),
+                        isEditable = subCategoryJson.getInt("isEditable"),
+                        outputOrder = subCategoryJson.getInt("outputOrder")
+                    )
+                )
+            }
+        }
+
+        val transactions = mutableListOf<com.firedispatch.log.data.entity.Transaction>()
+        if (json.has("transactions")) {
+            val transactionsArray = json.getJSONArray("transactions")
+            for (i in 0 until transactionsArray.length()) {
+                val transactionJson = transactionsArray.getJSONObject(i)
+                transactions.add(
+                    com.firedispatch.log.data.entity.Transaction(
+                        id = transactionJson.getLong("id"),
+                        fiscalYearId = transactionJson.getLong("fiscalYearId"),
+                        isIncome = transactionJson.getInt("isIncome"),
+                        date = transactionJson.getLong("date"),
+                        categoryId = transactionJson.getLong("categoryId"),
+                        subCategoryId = if (transactionJson.isNull("subCategoryId")) null else transactionJson.getLong("subCategoryId"),
+                        amount = transactionJson.getInt("amount"),
+                        memo = transactionJson.getString("memo"),
+                        createdAt = transactionJson.getLong("createdAt")
+                    )
+                )
+            }
+        }
+
         return BackupData(
             version = json.getInt("version"),
             timestamp = json.getLong("timestamp"),
@@ -265,7 +430,11 @@ class BackupManager(context: Context) {
             roleMemberCounts = roleMemberCounts,
             events = events,
             attendances = attendances,
-            settings = settings
+            settings = settings,
+            fiscalYears = fiscalYears,
+            accountCategories = accountCategories,
+            accountSubCategories = accountSubCategories,
+            transactions = transactions
         )
     }
 }
