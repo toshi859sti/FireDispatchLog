@@ -3,7 +3,26 @@
     "allow": [
       "Bash(./gradlew assembleDebug:*)",
       "Bash(adb install:*)",
-      "Bash(git init:*)"
+      "Bash(git init:*)",
+      "Bash(dir:*)",
+      "Bash(.\\\\gradlew.bat:*)",
+      "Bash(powershell:*)",
+      "Bash(gradlew.bat:*)",
+      "Bash(./gradlew.bat build:*)",
+      "Bash(./gradlew.bat:*)",
+      "WebSearch",
+      "Bash(git checkout:*)",
+      "Bash(ls:*)",
+      "Bash(adb devices:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\n会計機能フェーズ1: 基本ナビゲーション構築\n\n- AccountingMenuScreenを追加（会計メニュー画面）\n  - 4つのボタン配置（取引記入、帳簿確認・PDF、科目設定、年度・繰越金設定）\n  - 上部に年度・繰越金表示エリア（仮データ）\n- Screen.ktにAccountingMenuを追加\n- NavGraph.ktに会計メニューのルートを追加\n- MenuScreen.ktに「会計」ボタンを追加（5つ目のメニュー）\n\n動作確認: moto g52j 5G \\(Android 12\\) で正常動作を確認\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(./gradlew installDebug:*)",
+      "Bash(adb shell am start:*)",
+      "Bash(adb logcat:*)",
+      "Bash(./gradlew compileDebugKotlin:*)",
+      "Bash(adb uninstall:*)"
     ]
   }
 }

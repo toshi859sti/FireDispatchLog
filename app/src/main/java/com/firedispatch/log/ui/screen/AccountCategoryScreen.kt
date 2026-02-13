@@ -89,6 +89,13 @@ fun AccountCategoryScreen(
             // 科目一覧
             val categories = if (selectedTab == 0) incomeCategories else expenseCategories
 
+            // デバッグ表示
+            Text(
+                text = "科目数: ${categories.size}",
+                modifier = Modifier.padding(16.dp),
+                style = MaterialTheme.typography.bodySmall
+            )
+
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp),

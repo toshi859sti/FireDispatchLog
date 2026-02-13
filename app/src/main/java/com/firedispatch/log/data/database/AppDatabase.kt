@@ -6,10 +6,6 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import com.firedispatch.log.data.dao.AppSettingsDao
 import com.firedispatch.log.data.dao.AttendanceDao
 import com.firedispatch.log.data.dao.EventDao
@@ -129,10 +125,8 @@ abstract class AppDatabase : RoomDatabase() {
                     .addCallback(object : RoomDatabase.Callback() {
                         override fun onCreate(db: SupportSQLiteDatabase) {
                             super.onCreate(db)
-                            // 初期データ投入（バックグラウンドで実行）
-                            CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
-                                populateDefaultCategories(context)
-                            }
+                            // デフォルト科目データを直接SQL で投入
+                            insertDefaultCategories(db)
                         }
                     })
                     // .fallbackToDestructiveMigration() を削除（既存データ保護）
@@ -143,71 +137,41 @@ abstract class AppDatabase : RoomDatabase() {
         }
 
         /**
-         * デフォルト科目データの投入
+         * デフォルト科目データをSQLで直接投入
          */
-        private suspend fun populateDefaultCategories(context: Context) {
-            val database = getDatabase(context)
-            val categoryDao = database.accountCategoryDao()
+        private fun insertDefaultCategories(db: SupportSQLiteDatabase) {
+            // 収入科目（4件）
+            db.execSQL("INSERT INTO account_categories (name, isIncome, isEditable, sortOrder, outputOrder) VALUES ('南島原市会計課', 1, 0, 1, 1)")
+            db.execSQL("INSERT INTO account_categories (name, isIncome, isEditable, sortOrder, outputOrder) VALUES ('南島原市防災課', 1, 0, 2, 2)")
+            db.execSQL("INSERT INTO account_categories (name, isIncome, isEditable, sortOrder, outputOrder) VALUES ('預金利息', 1, 0, 3, 3)")
+            db.execSQL("INSERT INTO account_categories (name, isIncome, isEditable, sortOrder, outputOrder) VALUES ('寸志', 1, 0, 4, 4)")
 
-            // 科目テーブルが空の場合のみ実行
-            if (categoryDao.getCategoryCount() > 0) {
-                return
-            }
+            // 支出科目（8件）
+            db.execSQL("INSERT INTO account_categories (name, isIncome, isEditable, sortOrder, outputOrder) VALUES ('消防団共済掛金', 0, 0, 1, 1)")
+            db.execSQL("INSERT INTO account_categories (name, isIncome, isEditable, sortOrder, outputOrder) VALUES ('消防団負担金', 0, 0, 2, 2)")
+            db.execSQL("INSERT INTO account_categories (name, isIncome, isEditable, sortOrder, outputOrder) VALUES ('年末警戒', 0, 0, 3, 3)")
+            db.execSQL("INSERT INTO account_categories (name, isIncome, isEditable, sortOrder, outputOrder) VALUES ('旅行関連', 0, 0, 4, 4)")
+            db.execSQL("INSERT INTO account_categories (name, isIncome, isEditable, sortOrder, outputOrder) VALUES ('飲食関連', 0, 0, 5, 5)")
+            db.execSQL("INSERT INTO account_categories (name, isIncome, isEditable, sortOrder, outputOrder) VALUES ('環境整備費', 0, 0, 6, 6)")
+            db.execSQL("INSERT INTO account_categories (name, isIncome, isEditable, sortOrder, outputOrder) VALUES ('出動手当金', 0, 0, 7, 7)")
+            db.execSQL("INSERT INTO account_categories (name, isIncome, isEditable, sortOrder, outputOrder) VALUES ('免許補助金', 0, 1, 8, 8)")
 
-            // 収入科目（固定）
-            val incomeCategories = listOf(
-                AccountCategory(name = "南島原市会計課", isIncome = 1, isEditable = 0, sortOrder = 1, outputOrder = 1),
-                AccountCategory(name = "南島原市防災課", isIncome = 1, isEditable = 0, sortOrder = 2, outputOrder = 2),
-                AccountCategory(name = "預金利息", isIncome = 1, isEditable = 0, sortOrder = 3, outputOrder = 3),
-                AccountCategory(name = "寸志", isIncome = 1, isEditable = 0, sortOrder = 4, outputOrder = 4)
-            )
+            // 旅行関連（id=8）の補助科目
+            db.execSQL("INSERT INTO account_sub_categories (parentId, name, sortOrder, outputOrder, isEditable) VALUES (8, '宿泊料', 1, 1, 1)")
+            db.execSQL("INSERT INTO account_sub_categories (parentId, name, sortOrder, outputOrder, isEditable) VALUES (8, 'フェリー代', 2, 2, 1)")
+            db.execSQL("INSERT INTO account_sub_categories (parentId, name, sortOrder, outputOrder, isEditable) VALUES (8, '車代', 3, 3, 1)")
+            db.execSQL("INSERT INTO account_sub_categories (parentId, name, sortOrder, outputOrder, isEditable) VALUES (8, '食事代', 4, 4, 1)")
+            db.execSQL("INSERT INTO account_sub_categories (parentId, name, sortOrder, outputOrder, isEditable) VALUES (8, '宴会料金', 5, 5, 1)")
+            db.execSQL("INSERT INTO account_sub_categories (parentId, name, sortOrder, outputOrder, isEditable) VALUES (8, 'コンパニオン料金', 6, 6, 1)")
+            db.execSQL("INSERT INTO account_sub_categories (parentId, name, sortOrder, outputOrder, isEditable) VALUES (8, '土産代', 7, 7, 1)")
+            db.execSQL("INSERT INTO account_sub_categories (parentId, name, sortOrder, outputOrder, isEditable) VALUES (8, '駐車料金', 8, 8, 1)")
+            db.execSQL("INSERT INTO account_sub_categories (parentId, name, sortOrder, outputOrder, isEditable) VALUES (8, '二次会料金', 9, 9, 1)")
 
-            // 支出科目
-            val expenseCategories = listOf(
-                AccountCategory(name = "消防団共済掛金", isIncome = 0, isEditable = 0, sortOrder = 1, outputOrder = 1),
-                AccountCategory(name = "消防団負担金", isIncome = 0, isEditable = 0, sortOrder = 2, outputOrder = 2),
-                AccountCategory(name = "年末警戒", isIncome = 0, isEditable = 0, sortOrder = 3, outputOrder = 3),
-                AccountCategory(name = "旅行関連", isIncome = 0, isEditable = 0, sortOrder = 4, outputOrder = 4),
-                AccountCategory(name = "飲食関連", isIncome = 0, isEditable = 0, sortOrder = 5, outputOrder = 5),
-                AccountCategory(name = "環境整備費", isIncome = 0, isEditable = 0, sortOrder = 6, outputOrder = 6),
-                AccountCategory(name = "出動手当金", isIncome = 0, isEditable = 0, sortOrder = 7, outputOrder = 7),
-                AccountCategory(name = "免許補助金", isIncome = 0, isEditable = 1, sortOrder = 8, outputOrder = 8)
-            )
-
-            // 収入科目を投入
-            incomeCategories.forEach { categoryDao.insertCategory(it) }
-
-            // 支出科目を投入し、IDを保存
-            val expenseCategoryIds = mutableListOf<Long>()
-            expenseCategories.forEach { category ->
-                val id = categoryDao.insertCategory(category)
-                expenseCategoryIds.add(id)
-            }
-
-            // 旅行関連の補助科目（expenseCategories[3]）
-            val travelId = expenseCategoryIds[3]
-            val travelSubCategories = listOf(
-                AccountSubCategory(parentId = travelId, name = "宿泊料", sortOrder = 1, outputOrder = 1),
-                AccountSubCategory(parentId = travelId, name = "フェリー代", sortOrder = 2, outputOrder = 2),
-                AccountSubCategory(parentId = travelId, name = "車代", sortOrder = 3, outputOrder = 3),
-                AccountSubCategory(parentId = travelId, name = "食事代", sortOrder = 4, outputOrder = 4),
-                AccountSubCategory(parentId = travelId, name = "宴会料金", sortOrder = 5, outputOrder = 5),
-                AccountSubCategory(parentId = travelId, name = "コンパニオン料金", sortOrder = 6, outputOrder = 6),
-                AccountSubCategory(parentId = travelId, name = "土産代", sortOrder = 7, outputOrder = 7),
-                AccountSubCategory(parentId = travelId, name = "駐車料金", sortOrder = 8, outputOrder = 8),
-                AccountSubCategory(parentId = travelId, name = "二次会料金", sortOrder = 9, outputOrder = 9)
-            )
-
-            // 飲食関連の補助科目（expenseCategories[4]）
-            val diningId = expenseCategoryIds[4]
-            val diningSubCategories = listOf(
-                AccountSubCategory(parentId = diningId, name = "歓送迎会", sortOrder = 1, outputOrder = 1),
-                AccountSubCategory(parentId = diningId, name = "宴会", sortOrder = 2, outputOrder = 2),
-                AccountSubCategory(parentId = diningId, name = "コンパニオン料金", sortOrder = 3, outputOrder = 3),
-                AccountSubCategory(parentId = diningId, name = "お茶代", sortOrder = 4, outputOrder = 4)
-            )
-
-            categoryDao.insertSubCategories(travelSubCategories + diningSubCategories)
+            // 飲食関連（id=9）の補助科目
+            db.execSQL("INSERT INTO account_sub_categories (parentId, name, sortOrder, outputOrder, isEditable) VALUES (9, '歓送迎会', 1, 1, 1)")
+            db.execSQL("INSERT INTO account_sub_categories (parentId, name, sortOrder, outputOrder, isEditable) VALUES (9, '宴会', 2, 2, 1)")
+            db.execSQL("INSERT INTO account_sub_categories (parentId, name, sortOrder, outputOrder, isEditable) VALUES (9, 'コンパニオン料金', 3, 3, 1)")
+            db.execSQL("INSERT INTO account_sub_categories (parentId, name, sortOrder, outputOrder, isEditable) VALUES (9, 'お茶代', 4, 4, 1)")
         }
     }
 }
