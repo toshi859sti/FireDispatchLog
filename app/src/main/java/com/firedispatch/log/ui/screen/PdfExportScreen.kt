@@ -42,6 +42,7 @@ fun PdfExportScreen(
 ) {
     val context = LocalContext.current
     var showAllowanceDialog by remember { mutableStateOf(false) }
+    var showAccountingTypeDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -150,6 +151,22 @@ fun PdfExportScreen(
                         fontWeight = FontWeight.Bold
                     )
                 }
+
+                // 会計帳簿PDF
+                Button(
+                    onClick = {
+                        showAccountingTypeDialog = true
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .size(width = 280.dp, height = 72.dp)
+                ) {
+                    Text(
+                        text = "会計帳簿",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }
@@ -175,6 +192,70 @@ fun PdfExportScreen(
             },
             onDismiss = {
                 showAllowanceDialog = false
+            }
+        )
+    }
+
+    // 会計帳簿種類選択ダイアログ
+    if (showAccountingTypeDialog) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showAccountingTypeDialog = false },
+            title = { androidx.compose.material3.Text("出力する帳簿を選択") },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    androidx.compose.material3.Text("出力する帳簿の種類を選択してください")
+
+                    androidx.compose.material3.Button(
+                        onClick = {
+                            showAccountingTypeDialog = false
+                            viewModel.generateAccountingSummaryPdf(
+                                onSuccess = { intent ->
+                                    try {
+                                        context.startActivity(intent)
+                                    } catch (e: Exception) {
+                                        Toast.makeText(context, "PDFビューアーが見つかりません", Toast.LENGTH_SHORT).show()
+                                    }
+                                },
+                                onError = { error ->
+                                    Toast.makeText(context, "エラー: $error", Toast.LENGTH_LONG).show()
+                                }
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        androidx.compose.material3.Text("集計表")
+                    }
+
+                    androidx.compose.material3.Button(
+                        onClick = {
+                            showAccountingTypeDialog = false
+                            viewModel.generateTransactionListPdf(
+                                onSuccess = { intent ->
+                                    try {
+                                        context.startActivity(intent)
+                                    } catch (e: Exception) {
+                                        Toast.makeText(context, "PDFビューアーが見つかりません", Toast.LENGTH_SHORT).show()
+                                    }
+                                },
+                                onError = { error ->
+                                    Toast.makeText(context, "エラー: $error", Toast.LENGTH_LONG).show()
+                                }
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        androidx.compose.material3.Text("取引一覧")
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { showAccountingTypeDialog = false }) {
+                    androidx.compose.material3.Text("キャンセル")
+                }
             }
         )
     }

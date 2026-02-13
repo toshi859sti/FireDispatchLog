@@ -68,17 +68,6 @@ fun AccountingMenuScreen(navController: NavController) {
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // 年度・繰越金表示エリア（仮データ）
-                Text(
-                    text = "2025年度　繰越金: ¥125,000",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-
-                // 4つのメニューボタン
                 AccountingMenuButton(
                     text = "取引記入",
                     onClick = { navController.navigate(Screen.TransactionEntry.route) }

@@ -1033,5 +1033,344 @@ class PdfExportGenerator {
                 startY += charHeight
             }
         }
+
+        /**
+         * 会計帳簿（集計表）PDFを生成
+         */
+        suspend fun generateAccountingSummaryPdf(
+            context: Context,
+            organizationName: String,
+            fiscalYear: com.firedispatch.log.data.entity.FiscalYear,
+            transactions: List<com.firedispatch.log.data.entity.Transaction>,
+            categories: List<com.firedispatch.log.data.entity.AccountCategory>,
+            accountingRepository: com.firedispatch.log.data.repository.AccountingRepository
+        ): Result<File> = withContext(Dispatchers.IO) {
+            try {
+                val pdfDir = File(context.cacheDir, "PDFs")
+                if (!pdfDir.exists()) {
+                    pdfDir.mkdirs()
+                }
+
+                val dateFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+                val timestamp = dateFormat.format(Date())
+                val pdfFile = File(pdfDir, "会計帳簿_${fiscalYear.year}年度_$timestamp.pdf")
+
+                val pdfDocument = PdfDocument()
+                val pageInfo = PdfDocument.PageInfo.Builder(A4_WIDTH, A4_HEIGHT, 1).create()
+                val page = pdfDocument.startPage(pageInfo)
+                val canvas = page.canvas
+
+                drawAccountingLedgerTable(
+                    canvas,
+                    organizationName,
+                    fiscalYear,
+                    transactions,
+                    categories,
+                    accountingRepository
+                )
+
+                pdfDocument.finishPage(page)
+
+                FileOutputStream(pdfFile).use { outputStream ->
+                    pdfDocument.writeTo(outputStream)
+                }
+
+                pdfDocument.close()
+                Result.success(pdfFile)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+
+        private fun drawAccountingLedgerTable(
+            canvas: Canvas,
+            organizationName: String,
+            fiscalYear: com.firedispatch.log.data.entity.FiscalYear,
+            transactions: List<com.firedispatch.log.data.entity.Transaction>,
+            categories: List<com.firedispatch.log.data.entity.AccountCategory>,
+            accountingRepository: com.firedispatch.log.data.repository.AccountingRepository
+        ) {
+            val headerPaint = createPaint(Color.WHITE, 12f, true)
+            val cellPaint = createPaint(Color.BLACK, 10f, false)
+            val cellBoldPaint = createPaint(Color.BLACK, 10f, true)
+            val borderPaint = createPaint(Color.BLACK, 1f, false, Paint.Style.STROKE)
+            val headerBgPaint = createPaint(HEADER_COLOR, 1f, false, Paint.Style.FILL)
+            val alternateBgPaint = createPaint(ALTERNATE_BG_COLOR, 1f, false, Paint.Style.FILL)
+
+            var currentY = PAGE_MARGIN
+
+            // タイトル
+            val titlePaint = createPaint(Color.BLACK, 16f, true)
+            canvas.drawText("$organizationName 会計帳簿（${fiscalYear.year}年度）", PAGE_MARGIN, currentY, titlePaint)
+            currentY += 40f
+
+            // 収入の部
+            val incomeCategories = categories.filter { it.isIncome == 1 }
+            var incomeTotal = 0
+
+            // 「収入の部」見出し
+            canvas.drawText("【収入の部】", PAGE_MARGIN, currentY, cellBoldPaint)
+            currentY += 30f
+
+            incomeCategories.forEach { category ->
+                val categoryTransactions = transactions.filter {
+                    it.categoryId == category.id && it.isIncome == 1
+                }
+                val categoryTotal = categoryTransactions.sumOf { it.amount }
+                incomeTotal += categoryTotal
+
+                // 科目名と金額
+                canvas.drawText(category.name, PAGE_MARGIN + 20f, currentY, cellPaint)
+                canvas.drawText(
+                    "¥${String.format("%,d", categoryTotal)}",
+                    A4_WIDTH - PAGE_MARGIN - 100f,
+                    currentY,
+                    cellPaint
+                )
+                currentY += 25f
+            }
+
+            // 収入合計
+            currentY += 10f
+            canvas.drawText("収入合計", PAGE_MARGIN + 20f, currentY, cellBoldPaint)
+            canvas.drawText(
+                "¥${String.format("%,d", incomeTotal)}",
+                A4_WIDTH - PAGE_MARGIN - 100f,
+                currentY,
+                cellBoldPaint
+            )
+            currentY += 40f
+
+            // 支出の部
+            val expenseCategories = categories.filter { it.isIncome == 0 }
+            var expenseTotal = 0
+
+            // 「支出の部」見出し
+            canvas.drawText("【支出の部】", PAGE_MARGIN, currentY, cellBoldPaint)
+            currentY += 30f
+
+            expenseCategories.forEach { category ->
+                val categoryTransactions = transactions.filter {
+                    it.categoryId == category.id && it.isIncome == 0
+                }
+                val categoryTotal = categoryTransactions.sumOf { it.amount }
+                expenseTotal += categoryTotal
+
+                // 科目名と金額
+                canvas.drawText(category.name, PAGE_MARGIN + 20f, currentY, cellPaint)
+                canvas.drawText(
+                    "¥${String.format("%,d", categoryTotal)}",
+                    A4_WIDTH - PAGE_MARGIN - 100f,
+                    currentY,
+                    cellPaint
+                )
+                currentY += 25f
+            }
+
+            // 支出合計
+            currentY += 10f
+            canvas.drawText("支出合計", PAGE_MARGIN + 20f, currentY, cellBoldPaint)
+            canvas.drawText(
+                "¥${String.format("%,d", expenseTotal)}",
+                A4_WIDTH - PAGE_MARGIN - 100f,
+                currentY,
+                cellBoldPaint
+            )
+            currentY += 40f
+
+            // 差引残高
+            val balance = fiscalYear.carryOver + incomeTotal - expenseTotal
+            canvas.drawText("繰越金", PAGE_MARGIN + 20f, currentY, cellBoldPaint)
+            canvas.drawText(
+                "¥${String.format("%,d", fiscalYear.carryOver)}",
+                A4_WIDTH - PAGE_MARGIN - 100f,
+                currentY,
+                cellBoldPaint
+            )
+            currentY += 30f
+
+            canvas.drawText("差引残高", PAGE_MARGIN + 20f, currentY, cellBoldPaint)
+            canvas.drawText(
+                "¥${String.format("%,d", balance)}",
+                A4_WIDTH - PAGE_MARGIN - 100f,
+                currentY,
+                cellBoldPaint
+            )
+        }
+
+        /**
+         * 取引一覧PDFを生成
+         */
+        suspend fun generateTransactionListPdf(
+            context: Context,
+            organizationName: String,
+            fiscalYear: com.firedispatch.log.data.entity.FiscalYear,
+            transactions: List<com.firedispatch.log.data.entity.Transaction>,
+            categories: List<com.firedispatch.log.data.entity.AccountCategory>,
+            subCategoriesMap: Map<Long, String>
+        ): Result<File> = withContext(Dispatchers.IO) {
+            try {
+                val pdfDir = File(context.cacheDir, "PDFs")
+                if (!pdfDir.exists()) {
+                    pdfDir.mkdirs()
+                }
+
+                val dateFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+                val timestamp = dateFormat.format(Date())
+                val pdfFile = File(pdfDir, "取引一覧_${fiscalYear.year}年度_$timestamp.pdf")
+
+                val pdfDocument = PdfDocument()
+
+                // ページごとに取引を描画
+                val transactionsPerPage = 25 // 1ページあたりの取引数
+                val totalPages = (transactions.size + transactionsPerPage - 1) / transactionsPerPage
+
+                for (pageNum in 0 until totalPages) {
+                    val pageInfo = PdfDocument.PageInfo.Builder(A4_WIDTH, A4_HEIGHT, pageNum + 1).create()
+                    val page = pdfDocument.startPage(pageInfo)
+                    val canvas = page.canvas
+
+                    val startIndex = pageNum * transactionsPerPage
+                    val endIndex = minOf(startIndex + transactionsPerPage, transactions.size)
+                    val pageTransactions = transactions.subList(startIndex, endIndex)
+
+                    drawTransactionListTable(
+                        canvas,
+                        organizationName,
+                        fiscalYear,
+                        pageTransactions,
+                        categories,
+                        subCategoriesMap,
+                        pageNum + 1,
+                        totalPages
+                    )
+
+                    pdfDocument.finishPage(page)
+                }
+
+                FileOutputStream(pdfFile).use { outputStream ->
+                    pdfDocument.writeTo(outputStream)
+                }
+
+                pdfDocument.close()
+                Result.success(pdfFile)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+
+        private fun drawTransactionListTable(
+            canvas: Canvas,
+            organizationName: String,
+            fiscalYear: com.firedispatch.log.data.entity.FiscalYear,
+            transactions: List<com.firedispatch.log.data.entity.Transaction>,
+            categories: List<com.firedispatch.log.data.entity.AccountCategory>,
+            subCategoriesMap: Map<Long, String>,
+            pageNum: Int,
+            totalPages: Int
+        ) {
+            val headerPaint = createPaint(Color.WHITE, 10f, true)
+            val cellPaint = createPaint(Color.BLACK, 9f, false)
+            val borderPaint = createPaint(Color.BLACK, 1f, false, Paint.Style.STROKE)
+            val headerBgPaint = createPaint(HEADER_COLOR, 1f, false, Paint.Style.FILL)
+            val alternateBgPaint = createPaint(ALTERNATE_BG_COLOR, 1f, false, Paint.Style.FILL)
+
+            var currentY = PAGE_MARGIN
+
+            // タイトル
+            val titlePaint = createPaint(Color.BLACK, 14f, true)
+            canvas.drawText("$organizationName 取引一覧（${fiscalYear.year}年度）", PAGE_MARGIN, currentY, titlePaint)
+            currentY += 30f
+
+            // ページ番号
+            val pagePaint = createPaint(Color.BLACK, 9f, false)
+            canvas.drawText("ページ $pageNum / $totalPages", A4_WIDTH - PAGE_MARGIN - 80f, PAGE_MARGIN, pagePaint)
+            currentY += 10f
+
+            // テーブルヘッダー
+            val dateColWidth = 80f
+            val typeColWidth = 50f
+            val categoryColWidth = 120f
+            val subCategoryColWidth = 100f
+            val amountColWidth = 90f
+            val memoColWidth = A4_WIDTH - PAGE_MARGIN * 2 - dateColWidth - typeColWidth - categoryColWidth - subCategoryColWidth - amountColWidth
+
+            val headerHeight = 30f
+            var x = PAGE_MARGIN
+
+            // ヘッダー背景
+            canvas.drawRect(x, currentY, A4_WIDTH - PAGE_MARGIN, currentY + headerHeight, headerBgPaint)
+
+            // ヘッダーテキスト
+            drawCenteredText(canvas, "日付", RectF(x, currentY, x + dateColWidth, currentY + headerHeight), headerPaint)
+            x += dateColWidth
+            drawCenteredText(canvas, "区分", RectF(x, currentY, x + typeColWidth, currentY + headerHeight), headerPaint)
+            x += typeColWidth
+            drawCenteredText(canvas, "科目", RectF(x, currentY, x + categoryColWidth, currentY + headerHeight), headerPaint)
+            x += categoryColWidth
+            drawCenteredText(canvas, "補助科目", RectF(x, currentY, x + subCategoryColWidth, currentY + headerHeight), headerPaint)
+            x += subCategoryColWidth
+            drawCenteredText(canvas, "金額", RectF(x, currentY, x + amountColWidth, currentY + headerHeight), headerPaint)
+            x += amountColWidth
+            drawCenteredText(canvas, "メモ", RectF(x, currentY, x + memoColWidth, currentY + headerHeight), headerPaint)
+
+            // ヘッダー枠線
+            canvas.drawRect(PAGE_MARGIN, currentY, A4_WIDTH - PAGE_MARGIN, currentY + headerHeight, borderPaint)
+            currentY += headerHeight
+
+            // データ行
+            val dateFormat = SimpleDateFormat("MM/dd", Locale.JAPAN)
+            val rowHeight = 25f
+
+            transactions.forEachIndexed { index, transaction ->
+                // 背景色（交互）
+                if (index % 2 == 1) {
+                    canvas.drawRect(PAGE_MARGIN, currentY, A4_WIDTH - PAGE_MARGIN, currentY + rowHeight, alternateBgPaint)
+                }
+
+                x = PAGE_MARGIN
+
+                // 日付
+                val dateText = dateFormat.format(Date(transaction.date))
+                drawCenteredText(canvas, dateText, RectF(x, currentY, x + dateColWidth, currentY + rowHeight), cellPaint)
+                x += dateColWidth
+
+                // 区分
+                val typeText = if (transaction.isIncome == 1) "収入" else "支出"
+                drawCenteredText(canvas, typeText, RectF(x, currentY, x + typeColWidth, currentY + rowHeight), cellPaint)
+                x += typeColWidth
+
+                // 科目
+                val category = categories.find { it.id == transaction.categoryId }
+                drawCenteredText(canvas, category?.name ?: "", RectF(x, currentY, x + categoryColWidth, currentY + rowHeight), cellPaint)
+                x += categoryColWidth
+
+                // 補助科目
+                val subCategoryName = transaction.subCategoryId?.let { subCategoriesMap[it] } ?: ""
+                drawCenteredText(canvas, subCategoryName, RectF(x, currentY, x + subCategoryColWidth, currentY + rowHeight), cellPaint)
+                x += subCategoryColWidth
+
+                // 金額
+                val amountText = "¥${String.format("%,d", transaction.amount)}"
+                drawRightAlignedText(canvas, amountText, RectF(x, currentY, x + amountColWidth, currentY + rowHeight), cellPaint)
+                x += amountColWidth
+
+                // メモ
+                val memoText = if (transaction.memo.length > 15) transaction.memo.substring(0, 15) + "..." else transaction.memo
+                canvas.drawText(memoText, x + 5f, currentY + rowHeight / 2 + 3f, cellPaint)
+
+                // 行枠線
+                canvas.drawRect(PAGE_MARGIN, currentY, A4_WIDTH - PAGE_MARGIN, currentY + rowHeight, borderPaint)
+                currentY += rowHeight
+            }
+        }
+
+        private fun drawRightAlignedText(canvas: Canvas, text: String, rect: RectF, paint: Paint) {
+            val bounds = Rect()
+            paint.getTextBounds(text, 0, text.length, bounds)
+            val x = rect.right - bounds.width() - 5f
+            val y = rect.centerY() + bounds.height() / 2f
+            canvas.drawText(text, x, y, paint)
+        }
     }
 }
