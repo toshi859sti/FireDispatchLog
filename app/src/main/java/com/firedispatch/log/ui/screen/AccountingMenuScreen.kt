@@ -7,9 +7,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -18,24 +21,31 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.firedispatch.log.ui.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MenuScreen(navController: NavController) {
+fun AccountingMenuScreen(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = "消防団記録",
+                        text = "会計",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
                     )
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navController.navigateUp() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "戻る"
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -54,32 +64,46 @@ fun MenuScreen(navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(32.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                MenuButton(
-                    text = "団員名簿",
-                    onClick = { navController.navigate(Screen.MemberList.route) }
+                // 年度・繰越金表示エリア（仮データ）
+                Text(
+                    text = "2025年度　繰越金: ¥125,000",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
 
-                MenuButton(
-                    text = "出動表",
-                    onClick = { navController.navigate(Screen.DispatchTable.route) }
+                // 4つのメニューボタン
+                AccountingMenuButton(
+                    text = "取引記入",
+                    onClick = {
+                        // TODO: 取引記入画面への遷移
+                    }
                 )
 
-                MenuButton(
-                    text = "会計",
-                    onClick = { navController.navigate(Screen.AccountingMenu.route) }
+                AccountingMenuButton(
+                    text = "帳簿確認・PDF",
+                    onClick = {
+                        // TODO: 帳簿確認画面への遷移
+                    }
                 )
 
-                MenuButton(
-                    text = "PDF出力",
-                    onClick = { navController.navigate(Screen.PdfExport.route) }
+                AccountingMenuButton(
+                    text = "科目設定",
+                    onClick = {
+                        // TODO: 科目設定画面への遷移
+                    }
                 )
 
-                MenuButton(
-                    text = "設定",
-                    onClick = { navController.navigate(Screen.Settings.route) }
+                AccountingMenuButton(
+                    text = "年度・繰越金設定",
+                    onClick = {
+                        // TODO: 年度設定画面への遷移
+                    }
                 )
             }
         }
@@ -87,7 +111,7 @@ fun MenuScreen(navController: NavController) {
 }
 
 @Composable
-fun MenuButton(
+fun AccountingMenuButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier

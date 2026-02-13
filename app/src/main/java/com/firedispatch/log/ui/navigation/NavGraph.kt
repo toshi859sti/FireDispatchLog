@@ -6,6 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.firedispatch.log.ui.screen.AccountingMenuScreen
 import com.firedispatch.log.ui.screen.DispatchTableScreen
 import com.firedispatch.log.ui.screen.EventEditScreen
 import com.firedispatch.log.ui.screen.MemberEditScreen
@@ -60,6 +61,10 @@ fun NavGraph(navController: NavHostController) {
 
         composable(Screen.Settings.route) {
             SettingsScreen(navController = navController)
+        }
+
+        composable(Screen.AccountingMenu.route) {
+            AccountingMenuScreen(navController = navController)
         }
     }
 }
