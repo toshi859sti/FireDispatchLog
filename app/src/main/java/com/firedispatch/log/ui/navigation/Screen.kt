@@ -13,4 +13,6 @@ sealed class Screen(val route: String) {
     object PdfExport : Screen("pdf_export")
     object Settings : Screen("settings")
     object AccountingMenu : Screen("accounting_menu")
+    object FiscalYear : Screen("fiscal_year")
+    object AccountCategory : Screen("account_category")
 }

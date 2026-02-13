@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.firedispatch.log.ui.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,16 +95,12 @@ fun AccountingMenuScreen(navController: NavController) {
 
                 AccountingMenuButton(
                     text = "科目設定",
-                    onClick = {
-                        // TODO: 科目設定画面への遷移
-                    }
+                    onClick = { navController.navigate(Screen.AccountCategory.route) }
                 )
 
                 AccountingMenuButton(
                     text = "年度・繰越金設定",
-                    onClick = {
-                        // TODO: 年度設定画面への遷移
-                    }
+                    onClick = { navController.navigate(Screen.FiscalYear.route) }
                 )
             }
         }

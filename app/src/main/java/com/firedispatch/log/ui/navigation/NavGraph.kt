@@ -6,9 +6,11 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.firedispatch.log.ui.screen.AccountCategoryScreen
 import com.firedispatch.log.ui.screen.AccountingMenuScreen
 import com.firedispatch.log.ui.screen.DispatchTableScreen
 import com.firedispatch.log.ui.screen.EventEditScreen
+import com.firedispatch.log.ui.screen.FiscalYearScreen
 import com.firedispatch.log.ui.screen.MemberEditScreen
 import com.firedispatch.log.ui.screen.MemberListScreen
 import com.firedispatch.log.ui.screen.MenuScreen
@@ -65,6 +67,14 @@ fun NavGraph(navController: NavHostController) {
 
         composable(Screen.AccountingMenu.route) {
             AccountingMenuScreen(navController = navController)
+        }
+
+        composable(Screen.FiscalYear.route) {
+            FiscalYearScreen(navController = navController)
+        }
+
+        composable(Screen.AccountCategory.route) {
+            AccountCategoryScreen(navController = navController)
         }
     }
 }
