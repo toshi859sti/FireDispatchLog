@@ -11,6 +11,7 @@ import com.firedispatch.log.ui.screen.EventEditScreen
 import com.firedispatch.log.ui.screen.MemberEditScreen
 import com.firedispatch.log.ui.screen.MemberListScreen
 import com.firedispatch.log.ui.screen.MenuScreen
+import com.firedispatch.log.ui.screen.PdfExportScreen
 import com.firedispatch.log.ui.screen.RoleAssignmentScreen
 import com.firedispatch.log.ui.screen.RoleMemberCountSettingScreen
 import com.firedispatch.log.ui.screen.SettingsScreen
@@ -53,10 +54,12 @@ fun NavGraph(navController: NavHostController) {
             EventEditScreen(navController = navController, eventId = eventId)
         }
 
+        composable(Screen.PdfExport.route) {
+            PdfExportScreen(navController = navController)
+        }
+
         composable(Screen.Settings.route) {
             SettingsScreen(navController = navController)
         }
-
-        // Other screens will be added in subsequent tasks
     }
 }

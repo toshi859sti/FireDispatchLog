@@ -1,8 +1,6 @@
 package com.firedispatch.log.ui.screen
 
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -75,31 +73,11 @@ fun DispatchTableScreen(
     val selectedEventId by viewModel.selectedEventId.collectAsState()
     var showDeleteDialog by remember { mutableStateOf(false) }
 
-    val dateFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
-    val timestamp = dateFormat.format(Date())
-
-    // PDF出力用ファイルピッカー
-    val pdfExportLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("application/pdf")
-    ) { uri ->
-        uri?.let {
-            viewModel.exportPdf(
-                uri = it,
-                onSuccess = {
-                    Toast.makeText(context, "PDFを保存しました", Toast.LENGTH_SHORT).show()
-                },
-                onError = { error ->
-                    Toast.makeText(context, "エラー: $error", Toast.LENGTH_LONG).show()
-                }
-            )
-        }
-    }
-
     LiquidGlassBackground(
         modifier = Modifier.fillMaxSize(),
-        primaryColor = Color(0xFF000000),  // 黒
-        secondaryColor = Color(0xFFFF0000), // 赤
-        tertiaryColor = Color(0xFFFFFF00),  // 黄色
+        primaryColor = Color(0xFFFF5722),  // ディープオレンジ
+        secondaryColor = Color(0xFFFF9800), // オレンジ
+        tertiaryColor = Color(0xFFE53935),  // 赤
         animated = true
     ) {
         Scaffold(
@@ -133,143 +111,101 @@ fun DispatchTableScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // 上部ボタン
-            Column(
+            // 上部ボタン（1行に配置）
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Button(
-                        onClick = {
-                            selectedEventId?.let {
-                                navController.navigate(Screen.EventEdit.createRoute(it))
+                Button(
+                    onClick = {
+                        selectedEventId?.let {
+                            navController.navigate(Screen.EventEdit.createRoute(it))
+                        }
+                    },
+                    enabled = selectedEventId != null,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            if (selectedEventId != null) {
+                                Color.White.copy(alpha = 0.5f)
+                            } else {
+                                Color.Gray.copy(alpha = 0.3f)
                             }
-                        },
-                        enabled = selectedEventId != null,
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(
-                                if (selectedEventId != null) {
-                                    Color.White.copy(alpha = 0.5f)
-                                } else {
-                                    Color.Gray.copy(alpha = 0.3f)
-                                }
-                            )
-                            .border(
-                                width = 1.dp,
-                                color = Color.White.copy(alpha = 0.4f),
-                                shape = RoundedCornerShape(16.dp)
-                            ),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Transparent,
-                            contentColor = Color.Black,
-                            disabledContainerColor = Color.Transparent,
-                            disabledContentColor = Color.Gray
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = Color.White.copy(alpha = 0.4f),
+                            shape = RoundedCornerShape(16.dp)
                         ),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Text("編集", fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Button(
-                        onClick = { navController.navigate(Screen.EventEdit.createRoute(-1)) },
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Color.White.copy(alpha = 0.5f))
-                            .border(
-                                width = 1.dp,
-                                color = Color.White.copy(alpha = 0.4f),
-                                shape = RoundedCornerShape(16.dp)
-                            ),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Transparent,
-                            contentColor = Color.Black
-                        ),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Text("追加", fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Button(
-                        onClick = { showDeleteDialog = true },
-                        enabled = selectedEventId != null,
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(
-                                if (selectedEventId != null) {
-                                    Color.White.copy(alpha = 0.5f)
-                                } else {
-                                    Color.Gray.copy(alpha = 0.3f)
-                                }
-                            )
-                            .border(
-                                width = 1.dp,
-                                color = Color.White.copy(alpha = 0.4f),
-                                shape = RoundedCornerShape(16.dp)
-                            ),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Transparent,
-                            contentColor = Color.Black,
-                            disabledContainerColor = Color.Transparent,
-                            disabledContentColor = Color.Gray
-                        ),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Text("削除", fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                    }
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = Color.Black,
+                        disabledContainerColor = Color.Transparent,
+                        disabledContentColor = Color.Gray
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text("編集", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 }
-
+                Button(
+                    onClick = { navController.navigate(Screen.EventEdit.createRoute(-1)) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.White.copy(alpha = 0.5f))
+                        .border(
+                            width = 1.dp,
+                            color = Color.White.copy(alpha = 0.4f),
+                            shape = RoundedCornerShape(16.dp)
+                        ),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = Color.Black
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text("追加", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                }
+                Button(
+                    onClick = { showDeleteDialog = true },
+                    enabled = selectedEventId != null,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            if (selectedEventId != null) {
+                                Color.White.copy(alpha = 0.5f)
+                            } else {
+                                Color.Gray.copy(alpha = 0.3f)
+                            }
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = Color.White.copy(alpha = 0.4f),
+                            shape = RoundedCornerShape(16.dp)
+                        ),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = Color.Black,
+                        disabledContainerColor = Color.Transparent,
+                        disabledContentColor = Color.Gray
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text("削除", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                }
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Checkbox(
-                            checked = showSummary,
-                            onCheckedChange = { viewModel.toggleShowSummary() }
-                        )
-                        Text("合計表示", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.Black)
-                    }
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Checkbox(
-                            checked = showCurrentYearOnly,
-                            onCheckedChange = { viewModel.toggleShowCurrentYearOnly() }
-                        )
-                        Text("今年度のみ", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.Black)
-                    }
-
-                    Button(
-                        onClick = { pdfExportLauncher.launch("出動表_$timestamp.pdf") },
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Color.White.copy(alpha = 0.5f))
-                            .border(
-                                width = 1.dp,
-                                color = Color.White.copy(alpha = 0.4f),
-                                shape = RoundedCornerShape(16.dp)
-                            ),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Transparent,
-                            contentColor = Color.Black
-                        ),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Text("PDF出力", fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                    }
+                    Checkbox(
+                        checked = showSummary,
+                        onCheckedChange = { viewModel.toggleShowSummary() }
+                    )
+                    Text("合計", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
                 }
             }
 

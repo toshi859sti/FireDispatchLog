@@ -99,6 +99,15 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    fun resetEventData(onComplete: () -> Unit) {
+        viewModelScope.launch {
+            // 行事データと出席データを削除
+            database.eventDao().deleteAll()
+            database.attendanceDao().deleteAll()
+            onComplete()
+        }
+    }
+
     fun exportBackup(uri: Uri, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
             val result = backupManager.exportBackup(uri, getApplication())

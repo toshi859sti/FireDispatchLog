@@ -89,3 +89,15 @@ lint/tmp/
 
 # Misc
 .DS_Store
+
+# Claude Code settings
+.claude/
+
+# Test data
+*.csv
+
+# Temporary icon files
+icon_sv02_*.png
+
+# IntelliJ inspection profiles
+.idea/inspectionProfiles/

@@ -60,6 +60,7 @@ fun SettingsScreen(
     val organizationName by viewModel.organizationName.collectAsState()
     val allowPhoneCall by viewModel.allowPhoneCall.collectAsState()
     var showResetDialog by remember { mutableStateOf(false) }
+    var showResetEventDialog by remember { mutableStateOf(false) }
     var showSaveDialog by remember { mutableStateOf(false) }
 
     val dateFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
@@ -291,15 +292,26 @@ fun SettingsScreen(
                         color = MaterialTheme.colorScheme.onErrorContainer
                     )
                     Text(
-                        text = "すべてのデータを削除します。この操作は取り消せません。",
+                        text = "選択したデータを削除します。この操作は取り消せません。",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onErrorContainer
                     )
-                    Button(
-                        onClick = { showResetDialog = true },
-                        modifier = Modifier.fillMaxWidth()
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text("データを初期化")
+                        Button(
+                            onClick = { showResetEventDialog = true },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("行事データ初期化")
+                        }
+                        Button(
+                            onClick = { showResetDialog = true },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("全データ初期化")
+                        }
                     }
                 }
             }
@@ -340,12 +352,12 @@ fun SettingsScreen(
         )
     }
 
-    // データ初期化確認ダイアログ
+    // 全データ初期化確認ダイアログ
     if (showResetDialog) {
         AlertDialog(
             onDismissRequest = { showResetDialog = false },
-            title = { Text("データ初期化") },
-            text = { Text("すべてのデータを削除します。この操作は取り消せません。本当に実行しますか？") },
+            title = { Text("全データ初期化") },
+            text = { Text("すべてのデータ（団員・行事・出席記録）を削除します。この操作は取り消せません。本当に実行しますか？") },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -360,6 +372,32 @@ fun SettingsScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showResetDialog = false }) {
+                    Text("キャンセル")
+                }
+            }
+        )
+    }
+
+    // 行事データ初期化確認ダイアログ
+    if (showResetEventDialog) {
+        AlertDialog(
+            onDismissRequest = { showResetEventDialog = false },
+            title = { Text("行事データ初期化") },
+            text = { Text("すべての行事データと出席記録を削除します。団員データは保持されます。この操作は取り消せません。本当に実行しますか？") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.resetEventData {
+                            showResetEventDialog = false
+                            Toast.makeText(context, "行事データを初期化しました", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                ) {
+                    Text("初期化する")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showResetEventDialog = false }) {
                     Text("キャンセル")
                 }
             }

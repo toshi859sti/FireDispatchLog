@@ -58,7 +58,7 @@ class DispatchTableViewModel(application: Application) : AndroidViewModel(applic
     private val _showSummary = MutableStateFlow(true)
     val showSummary: StateFlow<Boolean> = _showSummary.asStateFlow()
 
-    private val _showCurrentYearOnly = MutableStateFlow(false)
+    private val _showCurrentYearOnly = MutableStateFlow(true)
     val showCurrentYearOnly: StateFlow<Boolean> = _showCurrentYearOnly.asStateFlow()
 
     private val _selectedEventId = MutableStateFlow<Long?>(null)
@@ -117,12 +117,16 @@ class DispatchTableViewModel(application: Application) : AndroidViewModel(applic
         return eventRepository.getAttendanceByEvent(eventId).first()
     }
 
-    private fun filterCurrentFiscalYear(events: List<Event>): List<Event> {
-        val calendar = Calendar.getInstance()
-        val currentYear = calendar.get(Calendar.YEAR)
-        val currentMonth = calendar.get(Calendar.MONTH) + 1
-
-        val fiscalYear = if (currentMonth >= 4) currentYear else currentYear - 1
+    private suspend fun filterCurrentFiscalYear(events: List<Event>): List<Event> {
+        // 設定から集計年度を取得
+        val fiscalYearStr = settingsRepository.getSettingValue(SettingsRepository.KEY_FISCAL_YEAR)
+        val fiscalYear = fiscalYearStr?.toIntOrNull() ?: run {
+            // 設定がない場合は現在の年度を使用
+            val calendar = Calendar.getInstance()
+            val currentYear = calendar.get(Calendar.YEAR)
+            val currentMonth = calendar.get(Calendar.MONTH) + 1
+            if (currentMonth >= 4) currentYear else currentYear - 1
+        }
 
         val fiscalYearStart = Calendar.getInstance().apply {
             set(fiscalYear, Calendar.APRIL, 1, 0, 0, 0)
@@ -211,6 +215,34 @@ class DispatchTableViewModel(application: Application) : AndroidViewModel(applic
                 onSuccess()
             } else {
                 onError(result.exceptionOrNull()?.message ?: "PDF出力に失敗しました")
+            }
+        }
+    }
+
+    fun generateAndPreviewPdf(onSuccess: (android.content.Intent) -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            // 設定から組織名を取得
+            val organizationName = settingsRepository.getSettingValue(SettingsRepository.KEY_ORGANIZATION_NAME) ?: "消防団"
+            val title = "$organizationName 出動表"
+
+            val result = PdfGenerator.generateAndPreviewPdf(
+                context = getApplication(),
+                title = title,
+                memberRows = _memberRows.value,
+                eventColumns = _eventColumns.value,
+                attendanceSummaries = _attendanceSummaries.value
+            )
+
+            if (result.isSuccess) {
+                val pdfFile = result.getOrNull()
+                if (pdfFile != null) {
+                    val intent = PdfGenerator.openPdfWithIntent(getApplication(), pdfFile)
+                    onSuccess(intent)
+                } else {
+                    onError("PDFファイルの生成に失敗しました")
+                }
+            } else {
+                onError(result.exceptionOrNull()?.message ?: "PDF生成に失敗しました")
             }
         }
     }

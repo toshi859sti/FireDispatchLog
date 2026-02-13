@@ -12,6 +12,7 @@ import com.firedispatch.log.data.model.RoleType
 import com.firedispatch.log.data.repository.EventRepository
 import com.firedispatch.log.data.repository.MemberRepository
 import com.firedispatch.log.data.repository.RoleRepository
+import com.firedispatch.log.data.repository.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,6 +31,7 @@ class EventEditViewModel(application: Application) : AndroidViewModel(applicatio
     private val memberRepository = MemberRepository(database.memberDao())
     private val roleRepository = RoleRepository(database.roleAssignmentDao(), database.roleMemberCountDao())
     private val eventRepository = EventRepository(database.eventDao(), database.attendanceDao())
+    private val settingsRepository = SettingsRepository(database.appSettingsDao())
 
     private val _eventId = MutableStateFlow<Long>(-1)
     private val _date = MutableStateFlow(Calendar.getInstance().timeInMillis)
@@ -43,6 +45,38 @@ class EventEditViewModel(application: Application) : AndroidViewModel(applicatio
 
     private val _attendanceMembers = MutableStateFlow<List<AttendanceMember>>(emptyList())
     val attendanceMembers: StateFlow<List<AttendanceMember>> = _attendanceMembers.asStateFlow()
+
+    private val _fiscalYearStart = MutableStateFlow(0L)
+    val fiscalYearStart: StateFlow<Long> = _fiscalYearStart.asStateFlow()
+
+    private val _fiscalYearEnd = MutableStateFlow(0L)
+    val fiscalYearEnd: StateFlow<Long> = _fiscalYearEnd.asStateFlow()
+
+    init {
+        loadFiscalYearRange()
+    }
+
+    private fun loadFiscalYearRange() {
+        viewModelScope.launch {
+            val fiscalYearStr = settingsRepository.getSettingValue(SettingsRepository.KEY_FISCAL_YEAR)
+            val fiscalYear = fiscalYearStr?.toIntOrNull() ?: run {
+                val calendar = Calendar.getInstance()
+                val currentYear = calendar.get(Calendar.YEAR)
+                val currentMonth = calendar.get(Calendar.MONTH) + 1
+                if (currentMonth >= 4) currentYear else currentYear - 1
+            }
+
+            _fiscalYearStart.value = Calendar.getInstance().apply {
+                set(fiscalYear, Calendar.APRIL, 1, 0, 0, 0)
+                set(Calendar.MILLISECOND, 0)
+            }.timeInMillis
+
+            _fiscalYearEnd.value = Calendar.getInstance().apply {
+                set(fiscalYear + 1, Calendar.MARCH, 31, 23, 59, 59)
+                set(Calendar.MILLISECOND, 999)
+            }.timeInMillis
+        }
+    }
 
     fun loadEvent(eventId: Long) {
         _eventId.value = eventId
@@ -122,7 +156,7 @@ class EventEditViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     fun setAllowanceIndex(index: Int) {
-        _allowanceIndex.value = index.coerceIn(1, 4)
+        _allowanceIndex.value = index.coerceIn(1, 3)
     }
 
     fun toggleAttendance(memberId: Long) {

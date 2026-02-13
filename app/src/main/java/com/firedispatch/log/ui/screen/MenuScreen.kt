@@ -68,6 +68,11 @@ fun MenuScreen(navController: NavController) {
                 )
 
                 MenuButton(
+                    text = "PDF出力",
+                    onClick = { navController.navigate(Screen.PdfExport.route) }
+                )
+
+                MenuButton(
                     text = "設定",
                     onClick = { navController.navigate(Screen.Settings.route) }
                 )

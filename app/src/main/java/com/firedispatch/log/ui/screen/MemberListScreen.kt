@@ -134,7 +134,7 @@ fun MemberListScreen(
                         ),
                         shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("名簿編集", fontWeight = FontWeight.Bold)
+                        Text("名簿編集", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     }
                     Button(
                         onClick = { navController.navigate(Screen.RoleAssignment.route) },
@@ -153,7 +153,7 @@ fun MemberListScreen(
                         ),
                         shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("役職割り当て", fontWeight = FontWeight.Bold)
+                        Text("役職割り当て", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     }
                 }
 

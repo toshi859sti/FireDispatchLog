@@ -10,5 +10,6 @@ sealed class Screen(val route: String) {
     object EventEdit : Screen("event_edit/{eventId}") {
         fun createRoute(eventId: Long = -1) = "event_edit/$eventId"
     }
+    object PdfExport : Screen("pdf_export")
     object Settings : Screen("settings")
 }
