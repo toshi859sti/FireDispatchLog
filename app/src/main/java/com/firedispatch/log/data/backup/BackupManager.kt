@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import com.firedispatch.log.data.database.AppDatabase
 import com.firedispatch.log.data.repository.AccountingRepository
+import com.firedispatch.log.data.repository.BackgroundColorRepository
 import com.firedispatch.log.data.repository.EventRepository
 import com.firedispatch.log.data.repository.MemberRepository
 import com.firedispatch.log.data.repository.RoleRepository
@@ -26,6 +27,7 @@ class BackupManager(context: Context) {
         database.accountCategoryDao(),
         database.transactionDao()
     )
+    private val backgroundColorRepository = BackgroundColorRepository(database.backgroundColorDao())
 
     suspend fun exportBackup(uri: Uri, context: Context): Result<Unit> = withContext(Dispatchers.IO) {
         try {
@@ -61,6 +63,10 @@ class BackupManager(context: Context) {
 
             val allTransactions = accountingRepository.allTransactions.first()
 
+            // 背景色設定を取得
+            val backgroundColorPresets = backgroundColorRepository.getAllPresets().first()
+            val screenBackgroundMappings = backgroundColorRepository.getAllMappings().first()
+
             val backupData = BackupData(
                 members = members,
                 roleAssignments = roleAssignments,
@@ -71,7 +77,9 @@ class BackupManager(context: Context) {
                 fiscalYears = fiscalYears,
                 accountCategories = accountCategories,
                 accountSubCategories = allSubCategories,
-                transactions = allTransactions
+                transactions = allTransactions,
+                backgroundColorPresets = backgroundColorPresets,
+                screenBackgroundMappings = screenBackgroundMappings
             )
 
             val json = backupDataToJson(backupData)
@@ -123,6 +131,14 @@ class BackupManager(context: Context) {
             accountingRepository.insertCategories(backupData.accountCategories)
             accountingRepository.insertSubCategories(backupData.accountSubCategories)
             accountingRepository.insertTransactions(backupData.transactions)
+
+            // 背景色設定を復元
+            backupData.backgroundColorPresets.forEach { preset ->
+                backgroundColorRepository.insertPreset(preset)
+            }
+            backupData.screenBackgroundMappings.forEach { mapping ->
+                backgroundColorRepository.setScreenMapping(mapping.screenName, mapping.presetId)
+            }
 
             Result.success(Unit)
         } catch (e: Exception) {
@@ -260,6 +276,29 @@ class BackupManager(context: Context) {
             transactionsArray.put(transactionJson)
         }
         json.put("transactions", transactionsArray)
+
+        // BackgroundColorPresets
+        val presetsArray = JSONArray()
+        backupData.backgroundColorPresets.forEach { preset ->
+            val presetJson = JSONObject()
+            presetJson.put("id", preset.id)
+            presetJson.put("name", preset.name)
+            presetJson.put("color1", preset.color1)
+            presetJson.put("color2", preset.color2)
+            presetJson.put("color3", preset.color3)
+            presetsArray.put(presetJson)
+        }
+        json.put("backgroundColorPresets", presetsArray)
+
+        // ScreenBackgroundMappings
+        val mappingsArray = JSONArray()
+        backupData.screenBackgroundMappings.forEach { mapping ->
+            val mappingJson = JSONObject()
+            mappingJson.put("screenName", mapping.screenName)
+            mappingJson.put("presetId", mapping.presetId)
+            mappingsArray.put(mappingJson)
+        }
+        json.put("screenBackgroundMappings", mappingsArray)
 
         return json.toString(2)
     }
@@ -422,6 +461,38 @@ class BackupManager(context: Context) {
             }
         }
 
+        // 背景色設定（バージョン3以降のみ）
+        val backgroundColorPresets = mutableListOf<com.firedispatch.log.data.entity.BackgroundColorPreset>()
+        if (json.has("backgroundColorPresets")) {
+            val presetsArray = json.getJSONArray("backgroundColorPresets")
+            for (i in 0 until presetsArray.length()) {
+                val presetJson = presetsArray.getJSONObject(i)
+                backgroundColorPresets.add(
+                    com.firedispatch.log.data.entity.BackgroundColorPreset(
+                        id = presetJson.getLong("id"),
+                        name = presetJson.getString("name"),
+                        color1 = presetJson.getString("color1"),
+                        color2 = presetJson.getString("color2"),
+                        color3 = presetJson.getString("color3")
+                    )
+                )
+            }
+        }
+
+        val screenBackgroundMappings = mutableListOf<com.firedispatch.log.data.entity.ScreenBackgroundMapping>()
+        if (json.has("screenBackgroundMappings")) {
+            val mappingsArray = json.getJSONArray("screenBackgroundMappings")
+            for (i in 0 until mappingsArray.length()) {
+                val mappingJson = mappingsArray.getJSONObject(i)
+                screenBackgroundMappings.add(
+                    com.firedispatch.log.data.entity.ScreenBackgroundMapping(
+                        screenName = mappingJson.getString("screenName"),
+                        presetId = mappingJson.getLong("presetId")
+                    )
+                )
+            }
+        }
+
         return BackupData(
             version = json.getInt("version"),
             timestamp = json.getLong("timestamp"),
@@ -434,7 +505,9 @@ class BackupManager(context: Context) {
             fiscalYears = fiscalYears,
             accountCategories = accountCategories,
             accountSubCategories = accountSubCategories,
-            transactions = transactions
+            transactions = transactions,
+            backgroundColorPresets = backgroundColorPresets,
+            screenBackgroundMappings = screenBackgroundMappings
         )
     }
 }

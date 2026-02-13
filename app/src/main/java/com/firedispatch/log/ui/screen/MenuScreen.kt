@@ -22,6 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.firedispatch.log.ui.components.ScreenBackground
 import com.firedispatch.log.ui.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,43 +45,45 @@ fun MenuScreen(navController: NavController) {
             )
         }
     ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
+        ScreenBackground(screenName = "menu") {
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(32.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
             ) {
-                MenuButton(
-                    text = "団員名簿",
-                    onClick = { navController.navigate(Screen.MemberList.route) }
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    MenuButton(
+                        text = "団員名簿",
+                        onClick = { navController.navigate(Screen.MemberList.route) }
+                    )
 
-                MenuButton(
-                    text = "出動表",
-                    onClick = { navController.navigate(Screen.DispatchTable.route) }
-                )
+                    MenuButton(
+                        text = "出動表",
+                        onClick = { navController.navigate(Screen.DispatchTable.route) }
+                    )
 
-                MenuButton(
-                    text = "会計",
-                    onClick = { navController.navigate(Screen.AccountingMenu.route) }
-                )
+                    MenuButton(
+                        text = "会計",
+                        onClick = { navController.navigate(Screen.AccountingMenu.route) }
+                    )
 
-                MenuButton(
-                    text = "PDF出力",
-                    onClick = { navController.navigate(Screen.PdfExport.route) }
-                )
+                    MenuButton(
+                        text = "PDF出力",
+                        onClick = { navController.navigate(Screen.PdfExport.route) }
+                    )
 
-                MenuButton(
-                    text = "設定",
-                    onClick = { navController.navigate(Screen.Settings.route) }
-                )
+                    MenuButton(
+                        text = "設定",
+                        onClick = { navController.navigate(Screen.Settings.route) }
+                    )
+                }
             }
         }
     }

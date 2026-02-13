@@ -8,6 +8,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.firedispatch.log.data.dao.AppSettingsDao
 import com.firedispatch.log.data.dao.AttendanceDao
+import com.firedispatch.log.data.dao.BackgroundColorDao
 import com.firedispatch.log.data.dao.EventDao
 import com.firedispatch.log.data.dao.MemberDao
 import com.firedispatch.log.data.dao.RoleAssignmentDao
@@ -16,11 +17,13 @@ import com.firedispatch.log.data.entity.AccountCategory
 import com.firedispatch.log.data.entity.AccountSubCategory
 import com.firedispatch.log.data.entity.AppSettings
 import com.firedispatch.log.data.entity.Attendance
+import com.firedispatch.log.data.entity.BackgroundColorPreset
 import com.firedispatch.log.data.entity.Event
 import com.firedispatch.log.data.entity.FiscalYear
 import com.firedispatch.log.data.entity.Member
 import com.firedispatch.log.data.entity.RoleAssignment
 import com.firedispatch.log.data.entity.RoleMemberCount
+import com.firedispatch.log.data.entity.ScreenBackgroundMapping
 import com.firedispatch.log.data.entity.Transaction
 
 @Database(
@@ -35,9 +38,12 @@ import com.firedispatch.log.data.entity.Transaction
         FiscalYear::class,
         AccountCategory::class,
         AccountSubCategory::class,
-        Transaction::class
+        Transaction::class,
+        // 背景色設定エンティティ
+        BackgroundColorPreset::class,
+        ScreenBackgroundMapping::class
     ],
-    version = 2,  // 1 → 2 に変更
+    version = 3,  // 2 → 3 に変更
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -51,6 +57,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun fiscalYearDao(): com.firedispatch.log.data.dao.FiscalYearDao
     abstract fun accountCategoryDao(): com.firedispatch.log.data.dao.AccountCategoryDao
     abstract fun transactionDao(): com.firedispatch.log.data.dao.TransactionDao
+    // 背景色設定DAO
+    abstract fun backgroundColorDao(): BackgroundColorDao
 
     companion object {
         @Volatile
@@ -114,6 +122,32 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * マイグレーション 2→3: 背景色設定テーブルの追加
+         */
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // background_color_presets テーブル
+                database.execSQL("""
+                    CREATE TABLE background_color_presets (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        name TEXT NOT NULL,
+                        color1 TEXT NOT NULL,
+                        color2 TEXT NOT NULL,
+                        color3 TEXT NOT NULL
+                    )
+                """)
+
+                // screen_background_mappings テーブル
+                database.execSQL("""
+                    CREATE TABLE screen_background_mappings (
+                        screenName TEXT PRIMARY KEY NOT NULL,
+                        presetId INTEGER NOT NULL
+                    )
+                """)
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -121,7 +155,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "fire_dispatch_database"
                 )
-                    .addMigrations(MIGRATION_1_2)  // マイグレーション追加
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)  // マイグレーション追加
                     .addCallback(object : RoomDatabase.Callback() {
                         override fun onCreate(db: SupportSQLiteDatabase) {
                             super.onCreate(db)

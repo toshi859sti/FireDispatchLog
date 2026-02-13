@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.firedispatch.log.ui.screen.AccountCategoryScreen
 import com.firedispatch.log.ui.screen.AccountingMenuScreen
+import com.firedispatch.log.ui.screen.BackgroundColorSettingScreen
 import com.firedispatch.log.ui.screen.DispatchTableScreen
 import com.firedispatch.log.ui.screen.EventEditScreen
 import com.firedispatch.log.ui.screen.FiscalYearScreen
@@ -15,6 +16,7 @@ import com.firedispatch.log.ui.screen.MemberEditScreen
 import com.firedispatch.log.ui.screen.MemberListScreen
 import com.firedispatch.log.ui.screen.MenuScreen
 import com.firedispatch.log.ui.screen.PdfExportScreen
+import com.firedispatch.log.ui.screen.PresetEditorScreen
 import com.firedispatch.log.ui.screen.RoleAssignmentScreen
 import com.firedispatch.log.ui.screen.RoleMemberCountSettingScreen
 import com.firedispatch.log.ui.screen.SettingsScreen
@@ -80,6 +82,27 @@ fun NavGraph(navController: NavHostController) {
 
         composable(Screen.TransactionEntry.route) {
             TransactionEntryScreen(navController = navController)
+        }
+
+        composable(Screen.BackgroundColorSetting.route) {
+            BackgroundColorSettingScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToPresetEditor = { presetId ->
+                    navController.navigate(Screen.PresetEditor.createRoute(presetId))
+                }
+            )
+        }
+
+        composable(
+            route = Screen.PresetEditor.route,
+            arguments = listOf(navArgument("presetId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val presetIdStr = backStackEntry.arguments?.getString("presetId")
+            val presetId = if (presetIdStr == "new") null else presetIdStr?.toLongOrNull()
+            PresetEditorScreen(
+                presetId = presetId,
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
     }
 }

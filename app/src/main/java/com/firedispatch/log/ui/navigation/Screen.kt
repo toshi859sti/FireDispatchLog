@@ -17,4 +17,8 @@ sealed class Screen(val route: String) {
     object AccountCategory : Screen("account_category")
     object TransactionEntry : Screen("transaction_entry")
     object LedgerView : Screen("ledger_view")
+    object BackgroundColorSetting : Screen("background_color_setting")
+    object PresetEditor : Screen("preset_editor/{presetId}") {
+        fun createRoute(presetId: Long? = null) = "preset_editor/${presetId ?: "new"}"
+    }
 }

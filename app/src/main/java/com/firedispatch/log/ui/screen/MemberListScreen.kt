@@ -56,6 +56,7 @@ import androidx.navigation.NavController
 import com.firedispatch.log.data.repository.SettingsRepository
 import com.firedispatch.log.ui.components.GlassCard
 import com.firedispatch.log.ui.components.LiquidGlassBackground
+import com.firedispatch.log.ui.components.ScreenBackground
 import com.firedispatch.log.ui.navigation.Screen
 import com.firedispatch.log.ui.viewmodel.MemberListViewModel
 import com.firedispatch.log.ui.viewmodel.MemberWithRole
@@ -71,12 +72,19 @@ fun MemberListScreen(
     val membersWithRoles by viewModel.membersWithRoles.collectAsState()
     val allowPhoneCall by settingsViewModel.allowPhoneCall.collectAsState()
 
-    LiquidGlassBackground(
-        modifier = Modifier.fillMaxSize(),
-        primaryColor = Color(0xFFFF5722),  // ディープオレンジ
-        secondaryColor = Color(0xFFFF9800), // オレンジ
-        tertiaryColor = Color(0xFFE53935),  // 赤
-        animated = true
+    ScreenBackground(
+        screenName = "member_list",
+        defaultBackground = { content ->
+            LiquidGlassBackground(
+                modifier = Modifier.fillMaxSize(),
+                primaryColor = Color(0xFFFF5722),  // ディープオレンジ
+                secondaryColor = Color(0xFFFF9800), // オレンジ
+                tertiaryColor = Color(0xFFE53935),  // 赤
+                animated = true
+            ) {
+                content()
+            }
+        }
     ) {
         Scaffold(
             containerColor = Color.Transparent,

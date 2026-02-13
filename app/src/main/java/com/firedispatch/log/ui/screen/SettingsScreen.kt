@@ -44,6 +44,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.firedispatch.log.ui.navigation.Screen
 import com.firedispatch.log.ui.viewmodel.SettingsViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -175,6 +176,33 @@ fun SettingsScreen(
                         placeholder = { Text("例: ○○市消防団第1分団") },
                         singleLine = true
                     )
+                }
+            }
+
+            // 背景色設定
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "背景色設定",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = "画面ごとの背景色をカスタマイズできます",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    OutlinedButton(
+                        onClick = { navController.navigate(Screen.BackgroundColorSetting.route) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("背景色を設定")
+                    }
                 }
             }
 
