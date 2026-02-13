@@ -81,26 +81,17 @@ fun AccountingMenuScreen(navController: NavController) {
                 // 4つのメニューボタン
                 AccountingMenuButton(
                     text = "取引記入",
-                    onClick = {
-                        // TODO: 取引記入画面への遷移
-                    }
-                )
-
-                AccountingMenuButton(
-                    text = "帳簿確認・PDF",
-                    onClick = {
-                        // TODO: 帳簿確認画面への遷移
-                    }
-                )
-
-                AccountingMenuButton(
-                    text = "科目設定",
-                    onClick = { navController.navigate(Screen.AccountCategory.route) }
+                    onClick = { navController.navigate(Screen.TransactionEntry.route) }
                 )
 
                 AccountingMenuButton(
                     text = "年度・繰越金設定",
                     onClick = { navController.navigate(Screen.FiscalYear.route) }
+                )
+
+                AccountingMenuButton(
+                    text = "科目設定",
+                    onClick = { navController.navigate(Screen.AccountCategory.route) }
                 )
             }
         }

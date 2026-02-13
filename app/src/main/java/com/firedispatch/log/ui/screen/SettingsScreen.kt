@@ -56,7 +56,6 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel()
 ) {
     val context = LocalContext.current
-    val fiscalYear by viewModel.fiscalYear.collectAsState()
     val organizationName by viewModel.organizationName.collectAsState()
     val allowPhoneCall by viewModel.allowPhoneCall.collectAsState()
     var showResetDialog by remember { mutableStateOf(false) }
@@ -125,56 +124,27 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // 集計年度設定
+            // 年度設定への案内
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "集計年度設定",
-                        style = MaterialTheme.typography.titleMedium
+                        text = "年度設定",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Text(
-                        text = "会計年度（4月〜翌3月）",
+                        text = "年度の設定は「会計」→「年度・繰越金設定」から行ってください。\nPDF出力時にはアクティブな年度が使用されます。",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Button(
-                            onClick = { viewModel.setFiscalYear(fiscalYear - 1) },
-                            modifier = Modifier.size(48.dp)
-                        ) {
-                            Text("-")
-                        }
-                        OutlinedTextField(
-                            value = fiscalYear.toString(),
-                            onValueChange = { newValue ->
-                                newValue.toIntOrNull()?.let { viewModel.setFiscalYear(it) }
-                            },
-                            modifier = Modifier.weight(1f),
-                            label = { Text("年度") },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            singleLine = true
-                        )
-                        Button(
-                            onClick = { viewModel.setFiscalYear(fiscalYear + 1) },
-                            modifier = Modifier.size(48.dp)
-                        ) {
-                            Text("+")
-                        }
-                    }
-                    Text(
-                        text = "令和${fiscalYear - 2018}年度",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
             }

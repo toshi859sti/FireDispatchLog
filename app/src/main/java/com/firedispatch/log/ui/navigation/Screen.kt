@@ -15,4 +15,6 @@ sealed class Screen(val route: String) {
     object AccountingMenu : Screen("accounting_menu")
     object FiscalYear : Screen("fiscal_year")
     object AccountCategory : Screen("account_category")
+    object TransactionEntry : Screen("transaction_entry")
+    object LedgerView : Screen("ledger_view")
 }

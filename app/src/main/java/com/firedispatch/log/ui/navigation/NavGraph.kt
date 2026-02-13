@@ -18,6 +18,7 @@ import com.firedispatch.log.ui.screen.PdfExportScreen
 import com.firedispatch.log.ui.screen.RoleAssignmentScreen
 import com.firedispatch.log.ui.screen.RoleMemberCountSettingScreen
 import com.firedispatch.log.ui.screen.SettingsScreen
+import com.firedispatch.log.ui.screen.TransactionEntryScreen
 
 @Composable
 fun NavGraph(navController: NavHostController) {
@@ -75,6 +76,10 @@ fun NavGraph(navController: NavHostController) {
 
         composable(Screen.AccountCategory.route) {
             AccountCategoryScreen(navController = navController)
+        }
+
+        composable(Screen.TransactionEntry.route) {
+            TransactionEntryScreen(navController = navController)
         }
     }
 }
