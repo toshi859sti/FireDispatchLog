@@ -728,7 +728,7 @@ fun SettingsScreen(
 }
 
 /**
- * コンパクトな年度カード（設定画面用）
+ * コンパクトな年度表示（設定画面用）
  */
 @Composable
 fun FiscalYearCompactCard(
@@ -741,82 +741,69 @@ fun FiscalYearCompactCard(
     val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.JAPANESE)
     val numberFormat = NumberFormat.getNumberInstance(Locale.JAPANESE)
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isActive)
-                MaterialTheme.colorScheme.surfaceVariant
-            else
-                MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "${fiscalYear.year}年度",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-                if (isActive) {
-                    AssistChip(
-                        onClick = {},
-                        label = { Text("現在", style = MaterialTheme.typography.labelSmall) },
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            labelColor = MaterialTheme.colorScheme.onPrimary
-                        ),
-                        modifier = Modifier.size(width = 60.dp, height = 28.dp)
-                    )
-                }
-            }
-
             Text(
-                text = "${dateFormat.format(Date(fiscalYear.startDate))} 〜 ${dateFormat.format(Date(fiscalYear.endDate))}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                text = "${fiscalYear.year}年度",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
             )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "繰越金: ¥${numberFormat.format(fiscalYear.carryOver)}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+            if (isActive) {
+                AssistChip(
+                    onClick = {},
+                    label = { Text("現在", style = MaterialTheme.typography.labelSmall) },
+                    colors = AssistChipDefaults.assistChipColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        labelColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                    modifier = Modifier.size(width = 60.dp, height = 28.dp)
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    TextButton(onClick = onEditCarryOver) {
-                        Text("編集", style = MaterialTheme.typography.labelSmall)
+            }
+        }
+
+        Text(
+            text = "${dateFormat.format(Date(fiscalYear.startDate))} 〜 ${dateFormat.format(Date(fiscalYear.endDate))}",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "繰越金: ¥${numberFormat.format(fiscalYear.carryOver)}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                TextButton(onClick = onEditCarryOver) {
+                    Text("編集", style = MaterialTheme.typography.labelSmall)
+                }
+                if (!isActive) {
+                    TextButton(onClick = onSetActive) {
+                        Text("使用", style = MaterialTheme.typography.labelSmall)
                     }
-                    if (!isActive) {
-                        TextButton(onClick = onSetActive) {
-                            Text("使用", style = MaterialTheme.typography.labelSmall)
-                        }
-                    }
-                    IconButton(
-                        onClick = onDelete,
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.Delete,
-                            contentDescription = "削除",
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
+                }
+                IconButton(
+                    onClick = onDelete,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "削除",
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
         }
