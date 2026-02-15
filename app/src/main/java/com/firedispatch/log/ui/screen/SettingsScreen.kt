@@ -85,7 +85,6 @@ fun SettingsScreen(
     var pendingCarryOver by remember { mutableStateOf(0) }
     var selectedYearForEdit by remember { mutableStateOf<FiscalYear?>(null) }
     var showCarryOverDialog by remember { mutableStateOf(false) }
-    var showDeleteYearDialog by remember { mutableStateOf(false) }
 
     val dateFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
     val timestamp = dateFormat.format(Date())
@@ -159,41 +158,69 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // 年度設定
-            Row(
+            Card(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
-                Text(
-                    text = "年度設定",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                TextButton(onClick = { showAddYearDialog = true }) {
-                    Text(if (fiscalYears.isEmpty()) "年度設定" else "年度変更")
-                }
-            }
-
-            if (fiscalYears.isEmpty()) {
-                Text(
-                    text = "年度が設定されていません。\n「年度設定」から年度を設定してください。",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            } else {
-                fiscalYears.forEach { fiscalYear ->
-                    FiscalYearCompactCard(
-                        fiscalYear = fiscalYear,
-                        isActive = fiscalYear.id == activeFiscalYear?.id,
-                        onSetActive = { fiscalYearViewModel.setActiveFiscalYear(fiscalYear.id) },
-                        onEditCarryOver = {
-                            selectedYearForEdit = fiscalYear
-                            showCarryOverDialog = true
-                        },
-                        onDelete = {
-                            selectedYearForEdit = fiscalYear
-                            showDeleteYearDialog = true
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "年度設定",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        TextButton(onClick = { showAddYearDialog = true }) {
+                            Text(if (activeFiscalYear == null) "年度設定" else "年度変更")
                         }
-                    )
+                    }
+
+                    if (activeFiscalYear == null) {
+                        Text(
+                            text = "年度が設定されていません。",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    } else {
+                        val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.JAPANESE)
+                        val numberFormat = NumberFormat.getNumberInstance(Locale.JAPANESE)
+
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(
+                                text = "${activeFiscalYear!!.year}年度",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "${dateFormat.format(Date(activeFiscalYear!!.startDate))} 〜 ${dateFormat.format(Date(activeFiscalYear!!.endDate))}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "繰越金: ¥${numberFormat.format(activeFiscalYear!!.carryOver)}",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                TextButton(
+                                    onClick = {
+                                        selectedYearForEdit = activeFiscalYear
+                                        showCarryOverDialog = true
+                                    }
+                                ) {
+                                    Text("編集")
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -693,119 +720,4 @@ fun SettingsScreen(
         )
     }
 
-    // 年度削除確認ダイアログ
-    if (showDeleteYearDialog && selectedYearForEdit != null) {
-        AlertDialog(
-            onDismissRequest = {
-                showDeleteYearDialog = false
-                selectedYearForEdit = null
-            },
-            title = { Text("年度の削除") },
-            text = { Text("${selectedYearForEdit!!.year}年度を削除しますか？\nこの年度の取引記録も全て削除されます。") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        fiscalYearViewModel.deleteFiscalYear(selectedYearForEdit!!)
-                        showDeleteYearDialog = false
-                        selectedYearForEdit = null
-                    }
-                ) {
-                    Text("削除", color = MaterialTheme.colorScheme.error)
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        showDeleteYearDialog = false
-                        selectedYearForEdit = null
-                    }
-                ) {
-                    Text("キャンセル")
-                }
-            }
-        )
-    }
-}
-
-/**
- * コンパクトな年度表示（設定画面用）
- */
-@Composable
-fun FiscalYearCompactCard(
-    fiscalYear: FiscalYear,
-    isActive: Boolean,
-    onSetActive: () -> Unit,
-    onEditCarryOver: () -> Unit,
-    onDelete: () -> Unit
-) {
-    val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.JAPANESE)
-    val numberFormat = NumberFormat.getNumberInstance(Locale.JAPANESE)
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "${fiscalYear.year}年度",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            if (isActive) {
-                AssistChip(
-                    onClick = {},
-                    label = { Text("現在", style = MaterialTheme.typography.labelSmall) },
-                    colors = AssistChipDefaults.assistChipColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        labelColor = MaterialTheme.colorScheme.onPrimary
-                    ),
-                    modifier = Modifier.size(width = 60.dp, height = 28.dp)
-                )
-            }
-        }
-
-        Text(
-            text = "${dateFormat.format(Date(fiscalYear.startDate))} 〜 ${dateFormat.format(Date(fiscalYear.endDate))}",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "繰越金: ¥${numberFormat.format(fiscalYear.carryOver)}",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                TextButton(onClick = onEditCarryOver) {
-                    Text("編集", style = MaterialTheme.typography.labelSmall)
-                }
-                if (!isActive) {
-                    TextButton(onClick = onSetActive) {
-                        Text("使用", style = MaterialTheme.typography.labelSmall)
-                    }
-                }
-                IconButton(
-                    onClick = onDelete,
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = "削除",
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-        }
-    }
 }
