@@ -663,18 +663,7 @@ fun SettingsScreen(
             },
             title = { Text("年度変更の確認") },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("年度を変更します。")
-                    Text(
-                        text = "既存の出動表と取引データをクリアしますか？",
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "※団員名簿と科目設定は保持されます。\n※クリアしない場合、古いデータが残り続けます。",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                Text("年度を変更すると、既存の出動表データと取引データはクリアされます。よろしいでしょうか？")
             },
             confirmButton = {
                 TextButton(
@@ -683,23 +672,20 @@ fun SettingsScreen(
                         fiscalYearViewModel.addFiscalYear(year, startDate, endDate, pendingCarryOver, clearExistingData = true)
                         showClearDataConfirmDialog = false
                         pendingYearData = null
-                        Toast.makeText(context, "既存データをクリアして年度を変更しました", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "年度を変更しました", Toast.LENGTH_SHORT).show()
                     }
                 ) {
-                    Text("クリアして変更")
+                    Text("変更する")
                 }
             },
             dismissButton = {
                 TextButton(
                     onClick = {
-                        val (year, startDate, endDate) = pendingYearData!!
-                        fiscalYearViewModel.addFiscalYear(year, startDate, endDate, pendingCarryOver, clearExistingData = false)
                         showClearDataConfirmDialog = false
                         pendingYearData = null
-                        Toast.makeText(context, "データを保持したまま年度を変更しました", Toast.LENGTH_SHORT).show()
                     }
                 ) {
-                    Text("保持して変更")
+                    Text("キャンセル")
                 }
             }
         )

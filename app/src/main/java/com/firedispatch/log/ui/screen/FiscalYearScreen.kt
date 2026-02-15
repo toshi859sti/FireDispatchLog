@@ -280,7 +280,7 @@ fun FiscalYearAddDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("年度の追加") },
+        title = { Text("記録年度の設定") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
@@ -311,7 +311,7 @@ fun FiscalYearAddDialog(
                     onConfirm(yearInt, startDate, endDate, carryOverInt)
                 }
             ) {
-                Text("追加")
+                Text("設定")
             }
         },
         dismissButton = {
