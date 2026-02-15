@@ -159,55 +159,41 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // 年度設定
-            Card(
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                )
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "年度設定",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                        TextButton(onClick = { showAddYearDialog = true }) {
-                            Text(if (fiscalYears.isEmpty()) "年度設定" else "年度変更")
-                        }
-                    }
+                Text(
+                    text = "年度設定",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                TextButton(onClick = { showAddYearDialog = true }) {
+                    Text(if (fiscalYears.isEmpty()) "年度設定" else "年度変更")
+                }
+            }
 
-                    if (fiscalYears.isEmpty()) {
-                        Text(
-                            text = "年度が設定されていません。\n「年度設定」から年度を設定してください。",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    } else {
-                        fiscalYears.forEach { fiscalYear ->
-                            FiscalYearCompactCard(
-                                fiscalYear = fiscalYear,
-                                isActive = fiscalYear.id == activeFiscalYear?.id,
-                                onSetActive = { fiscalYearViewModel.setActiveFiscalYear(fiscalYear.id) },
-                                onEditCarryOver = {
-                                    selectedYearForEdit = fiscalYear
-                                    showCarryOverDialog = true
-                                },
-                                onDelete = {
-                                    selectedYearForEdit = fiscalYear
-                                    showDeleteYearDialog = true
-                                }
-                            )
+            if (fiscalYears.isEmpty()) {
+                Text(
+                    text = "年度が設定されていません。\n「年度設定」から年度を設定してください。",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                fiscalYears.forEach { fiscalYear ->
+                    FiscalYearCompactCard(
+                        fiscalYear = fiscalYear,
+                        isActive = fiscalYear.id == activeFiscalYear?.id,
+                        onSetActive = { fiscalYearViewModel.setActiveFiscalYear(fiscalYear.id) },
+                        onEditCarryOver = {
+                            selectedYearForEdit = fiscalYear
+                            showCarryOverDialog = true
+                        },
+                        onDelete = {
+                            selectedYearForEdit = fiscalYear
+                            showDeleteYearDialog = true
                         }
-                    }
+                    )
                 }
             }
 
