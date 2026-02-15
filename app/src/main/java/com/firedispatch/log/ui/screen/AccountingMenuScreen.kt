@@ -74,11 +74,6 @@ fun AccountingMenuScreen(navController: NavController) {
                 )
 
                 AccountingMenuButton(
-                    text = "年度・繰越金設定",
-                    onClick = { navController.navigate(Screen.FiscalYear.route) }
-                )
-
-                AccountingMenuButton(
                     text = "科目設定",
                     onClick = { navController.navigate(Screen.AccountCategory.route) }
                 )

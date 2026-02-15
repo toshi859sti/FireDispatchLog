@@ -84,4 +84,13 @@ class AccountingRepository(
 
     suspend fun getTotalAmountByCategory(fiscalYearId: Long, isIncome: Int, categoryId: Long): Int =
         transactionDao.getTotalAmountByCategory(fiscalYearId, isIncome, categoryId) ?: 0
+
+    /**
+     * 差引残高を計算（繰越金 + 収入 - 支出）
+     */
+    suspend fun calculateBalance(fiscalYear: FiscalYear): Int {
+        val incomeTotal = getTotalAmountByType(fiscalYear.id, 1)
+        val expenseTotal = getTotalAmountByType(fiscalYear.id, 0)
+        return fiscalYear.carryOver + incomeTotal - expenseTotal
+    }
 }

@@ -11,25 +11,25 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TransactionDao {
-    @Query("SELECT * FROM transactions ORDER BY date DESC, createdAt DESC")
+    @Query("SELECT * FROM transactions ORDER BY date ASC, createdAt ASC")
     fun getAllTransactions(): Flow<List<Transaction>>
 
-    @Query("SELECT * FROM transactions WHERE fiscalYearId = :fiscalYearId ORDER BY date DESC, createdAt DESC")
+    @Query("SELECT * FROM transactions WHERE fiscalYearId = :fiscalYearId ORDER BY date ASC, createdAt ASC")
     fun getTransactionsByFiscalYear(fiscalYearId: Long): Flow<List<Transaction>>
 
-    @Query("SELECT * FROM transactions WHERE fiscalYearId = :fiscalYearId AND isIncome = :isIncome ORDER BY date DESC, createdAt DESC")
+    @Query("SELECT * FROM transactions WHERE fiscalYearId = :fiscalYearId AND isIncome = :isIncome ORDER BY date ASC, createdAt ASC")
     fun getTransactionsByFiscalYearAndType(fiscalYearId: Long, isIncome: Int): Flow<List<Transaction>>
 
-    @Query("SELECT * FROM transactions WHERE date >= :startDate AND date <= :endDate ORDER BY date DESC, createdAt DESC")
+    @Query("SELECT * FROM transactions WHERE date >= :startDate AND date <= :endDate ORDER BY date ASC, createdAt ASC")
     fun getTransactionsByDateRange(startDate: Long, endDate: Long): Flow<List<Transaction>>
 
-    @Query("SELECT * FROM transactions WHERE fiscalYearId = :fiscalYearId AND date >= :startDate AND date <= :endDate ORDER BY date DESC, createdAt DESC")
+    @Query("SELECT * FROM transactions WHERE fiscalYearId = :fiscalYearId AND date >= :startDate AND date <= :endDate ORDER BY date ASC, createdAt ASC")
     fun getTransactionsByFiscalYearAndDateRange(fiscalYearId: Long, startDate: Long, endDate: Long): Flow<List<Transaction>>
 
     @Query("SELECT * FROM transactions WHERE id = :id")
     suspend fun getTransactionById(id: Long): Transaction?
 
-    @Query("SELECT * FROM transactions WHERE date >= :startDate AND date < :endDate ORDER BY date DESC, createdAt DESC")
+    @Query("SELECT * FROM transactions WHERE date >= :startDate AND date < :endDate ORDER BY date ASC, createdAt ASC")
     fun getTransactionsForToday(startDate: Long, endDate: Long): Flow<List<Transaction>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
