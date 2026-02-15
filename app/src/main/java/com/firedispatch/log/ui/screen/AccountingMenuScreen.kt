@@ -77,6 +77,11 @@ fun AccountingMenuScreen(navController: NavController) {
                     text = "科目設定",
                     onClick = { navController.navigate(Screen.AccountCategory.route) }
                 )
+
+                AccountingMenuButton(
+                    text = "期首残高",
+                    onClick = { navController.navigate(Screen.OpeningBalance.route) }
+                )
             }
         }
     }

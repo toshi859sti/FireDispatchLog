@@ -15,6 +15,7 @@ import com.firedispatch.log.ui.screen.FiscalYearScreen
 import com.firedispatch.log.ui.screen.MemberEditScreen
 import com.firedispatch.log.ui.screen.MemberListScreen
 import com.firedispatch.log.ui.screen.MenuScreen
+import com.firedispatch.log.ui.screen.OpeningBalanceScreen
 import com.firedispatch.log.ui.screen.PdfExportScreen
 import com.firedispatch.log.ui.screen.PresetEditorScreen
 import com.firedispatch.log.ui.screen.RoleAssignmentScreen
@@ -82,6 +83,10 @@ fun NavGraph(navController: NavHostController) {
 
         composable(Screen.TransactionEntry.route) {
             TransactionEntryScreen(navController = navController)
+        }
+
+        composable(Screen.OpeningBalance.route) {
+            OpeningBalanceScreen(navController = navController)
         }
 
         composable(Screen.BackgroundColorSetting.route) {

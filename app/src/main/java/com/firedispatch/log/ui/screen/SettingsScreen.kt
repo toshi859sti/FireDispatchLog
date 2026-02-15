@@ -83,8 +83,6 @@ fun SettingsScreen(
     var showClearDataConfirmDialog by remember { mutableStateOf(false) }
     var pendingYearData by remember { mutableStateOf<Triple<Int, Long, Long>?>(null) }
     var pendingCarryOver by remember { mutableStateOf(0) }
-    var selectedYearForEdit by remember { mutableStateOf<FiscalYear?>(null) }
-    var showCarryOverDialog by remember { mutableStateOf(false) }
 
     val dateFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
     val timestamp = dateFormat.format(Date())
@@ -201,24 +199,6 @@ fun SettingsScreen(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "繰越金: ¥${numberFormat.format(activeFiscalYear!!.carryOver)}",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                                TextButton(
-                                    onClick = {
-                                        selectedYearForEdit = activeFiscalYear
-                                        showCarryOverDialog = true
-                                    }
-                                ) {
-                                    Text("編集")
-                                }
-                            }
                         }
                     }
                 }
@@ -703,21 +683,4 @@ fun SettingsScreen(
             }
         )
     }
-
-    // 繰越金編集ダイアログ
-    if (showCarryOverDialog && selectedYearForEdit != null) {
-        CarryOverEditDialog(
-            currentAmount = selectedYearForEdit!!.carryOver,
-            onDismiss = {
-                showCarryOverDialog = false
-                selectedYearForEdit = null
-            },
-            onConfirm = { newAmount ->
-                fiscalYearViewModel.updateCarryOver(selectedYearForEdit!!, newAmount)
-                showCarryOverDialog = false
-                selectedYearForEdit = null
-            }
-        )
-    }
-
 }
