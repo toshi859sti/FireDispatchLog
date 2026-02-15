@@ -38,7 +38,7 @@ fun FiscalYearScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "年度・繰越金設定",
+                        text = "年度設定",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )

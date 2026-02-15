@@ -11,5 +11,6 @@ data class FiscalYear(
     val startDate: Long,     // Unix timestamp（ミリ秒）
     val endDate: Long,       // Unix timestamp（ミリ秒）
     val carryOver: Int = 0,  // 繰越金（円単位）
-    val isActive: Int = 0    // 1=現在の年度, 0=それ以外
+    val isActive: Int = 0,   // 1=現在の年度, 0=それ以外
+    val travelStartDate: Long? = null  // 旅行開始日（1日目）
 )

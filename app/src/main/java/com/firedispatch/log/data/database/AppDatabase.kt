@@ -43,7 +43,7 @@ import com.firedispatch.log.data.entity.Transaction
         BackgroundColorPreset::class,
         ScreenBackgroundMapping::class
     ],
-    version = 3,  // 2 → 3 に変更
+    version = 4,  // 3 → 4 に変更
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -148,6 +148,17 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * マイグレーション 3→4: fiscal_years テーブルに travelStartDate カラムを追加
+         */
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("""
+                    ALTER TABLE fiscal_years ADD COLUMN travelStartDate INTEGER
+                """)
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -155,7 +166,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "fire_dispatch_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)  // マイグレーション追加
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)  // マイグレーション追加
                     .addCallback(object : RoomDatabase.Callback() {
                         override fun onCreate(db: SupportSQLiteDatabase) {
                             super.onCreate(db)

@@ -39,10 +39,6 @@ class TransactionEntryViewModel(application: Application) : AndroidViewModel(app
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
 
-    // 旅行期間（開始日）
-    private val _travelStartDate = MutableStateFlow<Long?>(null)
-    val travelStartDate: StateFlow<Long?> = _travelStartDate
-
     /**
      * 指定科目の補助科目を取得
      */
@@ -132,7 +128,16 @@ class TransactionEntryViewModel(application: Application) : AndroidViewModel(app
     /**
      * 旅行開始日を設定
      */
-    fun setTravelStartDate(date: Long?) {
-        _travelStartDate.value = date
+    fun setTravelStartDate(fiscalYearId: Long, date: Long?) {
+        viewModelScope.launch {
+            try {
+                val fiscalYear = repository.getFiscalYearById(fiscalYearId)
+                fiscalYear?.let {
+                    repository.updateFiscalYear(it.copy(travelStartDate = date))
+                }
+            } catch (e: Exception) {
+                _errorMessage.value = "旅行期間の設定に失敗しました: ${e.message}"
+            }
+        }
     }
 }
