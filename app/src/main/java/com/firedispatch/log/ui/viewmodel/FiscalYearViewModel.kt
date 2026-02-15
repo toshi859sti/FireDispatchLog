@@ -65,7 +65,11 @@ class FiscalYearViewModel(application: Application) : AndroidViewModel(applicati
                     carryOver = carryOver,
                     isActive = 0
                 )
-                repository.insertFiscalYear(fiscalYear)
+                val newYearId = repository.insertFiscalYear(fiscalYear)
+
+                // 新しい年度を自動的にアクティブに設定
+                repository.setActiveFiscalYear(newYearId)
+
                 hideAddDialog()
             } catch (e: Exception) {
                 _errorMessage.value = "年度の追加に失敗しました: ${e.message}"
