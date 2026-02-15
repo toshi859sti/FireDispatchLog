@@ -1293,8 +1293,8 @@ class PdfExportGenerator {
             val dateFormat = SimpleDateFormat("MM/dd", Locale.JAPAN)
 
             // 収入と支出に分けて処理
-            val incomeCategories = categories.filter { it.isIncome == 1 }.sortedBy { it.displayOrder }
-            val expenseCategories = categories.filter { it.isIncome == 0 }.sortedBy { it.displayOrder }
+            val incomeCategories = categories.filter { it.isIncome == 1 }.sortedBy { it.outputOrder }
+            val expenseCategories = categories.filter { it.isIncome == 0 }.sortedBy { it.outputOrder }
 
             // 収入の部
             if (incomeCategories.isNotEmpty()) {
