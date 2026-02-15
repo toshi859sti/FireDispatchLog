@@ -80,6 +80,9 @@ fun SettingsScreen(
     var showMoveToNextYearConfirmDialog by remember { mutableStateOf(false) }
     var shouldSaveBeforeMove by remember { mutableStateOf(false) }
     var showAddYearDialog by remember { mutableStateOf(false) }
+    var showClearDataConfirmDialog by remember { mutableStateOf(false) }
+    var pendingYearData by remember { mutableStateOf<Triple<Int, Long, Long>?>(null) }
+    var pendingCarryOver by remember { mutableStateOf(0) }
     var selectedYearForEdit by remember { mutableStateOf<FiscalYear?>(null) }
     var showCarryOverDialog by remember { mutableStateOf(false) }
     var showDeleteYearDialog by remember { mutableStateOf(false) }
@@ -178,13 +181,13 @@ fun SettingsScreen(
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                         TextButton(onClick = { showAddYearDialog = true }) {
-                            Text("年度追加")
+                            Text(if (fiscalYears.isEmpty()) "年度設定" else "年度変更")
                         }
                     }
 
                     if (fiscalYears.isEmpty()) {
                         Text(
-                            text = "年度が設定されていません。\n「年度追加」から年度を追加してください。",
+                            text = "年度が設定されていません。\n「年度設定」から年度を設定してください。",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
@@ -635,10 +638,70 @@ fun SettingsScreen(
         FiscalYearAddDialog(
             onDismiss = { showAddYearDialog = false },
             onConfirm = { year, startDate, endDate, carryOver ->
-                fiscalYearViewModel.addFiscalYear(year, startDate, endDate, carryOver)
-                showAddYearDialog = false
+                // 既存年度がある場合は確認ダイアログを表示
+                if (fiscalYears.isNotEmpty()) {
+                    pendingYearData = Triple(year, startDate, endDate)
+                    pendingCarryOver = carryOver
+                    showAddYearDialog = false
+                    showClearDataConfirmDialog = true
+                } else {
+                    // 最初の年度追加の場合はそのまま追加
+                    fiscalYearViewModel.addFiscalYear(year, startDate, endDate, carryOver, clearExistingData = false)
+                    showAddYearDialog = false
+                }
             },
             viewModel = fiscalYearViewModel
+        )
+    }
+
+    // データクリア確認ダイアログ
+    if (showClearDataConfirmDialog && pendingYearData != null) {
+        AlertDialog(
+            onDismissRequest = {
+                showClearDataConfirmDialog = false
+                pendingYearData = null
+            },
+            title = { Text("年度変更の確認") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("年度を変更します。")
+                    Text(
+                        text = "既存の出動表と取引データをクリアしますか？",
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "※団員名簿と科目設定は保持されます。\n※クリアしない場合、古いデータが残り続けます。",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val (year, startDate, endDate) = pendingYearData!!
+                        fiscalYearViewModel.addFiscalYear(year, startDate, endDate, pendingCarryOver, clearExistingData = true)
+                        showClearDataConfirmDialog = false
+                        pendingYearData = null
+                        Toast.makeText(context, "既存データをクリアして年度を変更しました", Toast.LENGTH_SHORT).show()
+                    }
+                ) {
+                    Text("クリアして変更")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        val (year, startDate, endDate) = pendingYearData!!
+                        fiscalYearViewModel.addFiscalYear(year, startDate, endDate, pendingCarryOver, clearExistingData = false)
+                        showClearDataConfirmDialog = false
+                        pendingYearData = null
+                        Toast.makeText(context, "データを保持したまま年度を変更しました", Toast.LENGTH_SHORT).show()
+                    }
+                ) {
+                    Text("保持して変更")
+                }
+            }
         )
     }
 

@@ -9,6 +9,7 @@ import com.firedispatch.log.data.repository.AccountingRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -19,6 +20,13 @@ class FiscalYearViewModel(application: Application) : AndroidViewModel(applicati
         database.accountCategoryDao(),
         database.transactionDao()
     )
+
+    /**
+     * 既存年度が存在するかチェック
+     */
+    suspend fun hasExistingFiscalYears(): Boolean {
+        return repository.allFiscalYears.firstOrNull()?.isNotEmpty() ?: false
+    }
 
     val allFiscalYears = repository.allFiscalYears
     val activeFiscalYear = repository.activeFiscalYear
@@ -37,9 +45,19 @@ class FiscalYearViewModel(application: Application) : AndroidViewModel(applicati
         _showAddDialog.value = false
     }
 
-    fun addFiscalYear(year: Int, startDate: Long, endDate: Long, carryOver: Int) {
+    fun addFiscalYear(year: Int, startDate: Long, endDate: Long, carryOver: Int, clearExistingData: Boolean = false) {
         viewModelScope.launch {
             try {
+                // 既存データをクリアする場合
+                if (clearExistingData) {
+                    // 出動表データを削除
+                    database.attendanceDao().deleteAll()
+                    database.eventDao().deleteAll()
+
+                    // 全取引データを削除
+                    database.transactionDao().deleteAll()
+                }
+
                 val fiscalYear = FiscalYear(
                     year = year,
                     startDate = startDate,
