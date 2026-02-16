@@ -12,6 +12,7 @@ import com.firedispatch.log.ui.screen.BackgroundColorSettingScreen
 import com.firedispatch.log.ui.screen.DispatchTableScreen
 import com.firedispatch.log.ui.screen.EventEditScreen
 import com.firedispatch.log.ui.screen.FiscalYearScreen
+import com.firedispatch.log.ui.screen.ManualScreen
 import com.firedispatch.log.ui.screen.MemberEditScreen
 import com.firedispatch.log.ui.screen.MemberListScreen
 import com.firedispatch.log.ui.screen.MenuScreen
@@ -108,6 +109,10 @@ fun NavGraph(navController: NavHostController) {
                 presetId = presetId,
                 onNavigateBack = { navController.popBackStack() }
             )
+        }
+
+        composable(Screen.Manual.route) {
+            ManualScreen(navController = navController)
         }
     }
 }

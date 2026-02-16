@@ -26,6 +26,9 @@ class MemberEditViewModel(application: Application) : AndroidViewModel(applicati
     private val _editRows = MutableStateFlow<List<MemberEditRow>>(List(20) { MemberEditRow() })
     val editRows: StateFlow<List<MemberEditRow>> = _editRows.asStateFlow()
 
+    private val _focusedRowIndex = MutableStateFlow<Int?>(null)
+    val focusedRowIndex: StateFlow<Int?> = _focusedRowIndex.asStateFlow()
+
     init {
         loadMembers()
     }
@@ -33,8 +36,8 @@ class MemberEditViewModel(application: Application) : AndroidViewModel(applicati
     private fun loadMembers() {
         viewModelScope.launch {
             memberRepository.allMembers.collect { members ->
-                val collator = Collator.getInstance(Locale.JAPANESE)
-                val sortedMembers = members.sortedWith(compareBy(collator) { it.name })
+                // sortKeyで並び替え（保存時の順序を保持）
+                val sortedMembers = members.sortedBy { it.sortKey }
 
                 val rows = mutableListOf<MemberEditRow>()
                 sortedMembers.forEach { member ->
@@ -62,21 +65,54 @@ class MemberEditViewModel(application: Application) : AndroidViewModel(applicati
         if (index in currentRows.indices) {
             val row = currentRows[index]
             currentRows[index] = row.copy(name = name, phoneNumber = phoneNumber)
+            _editRows.value = currentRows
+        }
+    }
 
-            // 50音順にソート（空行は後ろに）
-            val collator = Collator.getInstance(Locale.JAPANESE)
-            val nonEmptyRows = currentRows.filter { it.name.isNotBlank() }
-                .sortedWith(compareBy(collator) { it.name })
-            val emptyRows = currentRows.filter { it.name.isBlank() }
+    // 五十音順にソート
+    fun sortByName() {
+        val currentRows = _editRows.value.toMutableList()
+        val collator = Collator.getInstance(Locale.JAPANESE)
+        val nonEmptyRows = currentRows.filter { it.name.isNotBlank() }
+            .sortedWith(compareBy(collator) { it.name })
+        val emptyRows = currentRows.filter { it.name.isBlank() }
+        _editRows.value = nonEmptyRows + emptyRows
+    }
 
-            _editRows.value = nonEmptyRows + emptyRows
+    // フォーカスを設定
+    fun setFocusedRow(index: Int?) {
+        _focusedRowIndex.value = index
+    }
+
+    // フォーカスされている行を上に移動
+    fun moveFocusedRowUp() {
+        val index = _focusedRowIndex.value ?: return
+        if (index > 0) {
+            val currentRows = _editRows.value.toMutableList()
+            val temp = currentRows[index]
+            currentRows[index] = currentRows[index - 1]
+            currentRows[index - 1] = temp
+            _editRows.value = currentRows
+            _focusedRowIndex.value = index - 1
+        }
+    }
+
+    // フォーカスされている行を下に移動
+    fun moveFocusedRowDown() {
+        val index = _focusedRowIndex.value ?: return
+        val currentRows = _editRows.value
+        if (index < currentRows.size - 1) {
+            val mutableRows = currentRows.toMutableList()
+            val temp = mutableRows[index]
+            mutableRows[index] = mutableRows[index + 1]
+            mutableRows[index + 1] = temp
+            _editRows.value = mutableRows
+            _focusedRowIndex.value = index + 1
         }
     }
 
     fun saveMembers(onComplete: () -> Unit) {
         viewModelScope.launch {
-            val collator = Collator.getInstance(Locale.JAPANESE)
-
             // 空でない行のみ抽出
             val validRows = _editRows.value.filter { it.name.isNotBlank() }
 
@@ -90,10 +126,8 @@ class MemberEditViewModel(application: Application) : AndroidViewModel(applicati
             // 既存のメンバーを削除
             memberRepository.deleteAll()
 
-            // 五十音順にソートして保存
-            val sortedRows = validRows.sortedWith(compareBy(collator) { it.name })
-
-            sortedRows.forEachIndexed { index, row ->
+            // 現在の順序で保存（ソートしない）
+            validRows.forEachIndexed { index, row ->
                 val member = Member(
                     name = row.name,
                     phoneNumber = row.phoneNumber,

@@ -164,7 +164,7 @@ fun FiscalYearCard(
             ) {
                 Text(
                     text = "${fiscalYear.year}年度",
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold
                 )
                 if (isActive) {

@@ -22,4 +22,5 @@ sealed class Screen(val route: String) {
     object PresetEditor : Screen("preset_editor/{presetId}") {
         fun createRoute(presetId: Long? = null) = "preset_editor/${presetId ?: "new"}"
     }
+    object Manual : Screen("manual")
 }

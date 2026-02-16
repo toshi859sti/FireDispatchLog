@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消防団記録アプリ 操作マニュアル</title>
+    <style>
+        body {
+            font-family: 'Yu Gothic', 'Meiryo', sans-serif;
+            line-height: 1.8;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #FF5722;
+            border-bottom: 3px solid #FF5722;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        h2 {
+            color: #FF9800;
+            border-left: 5px solid #FF9800;
+            padding-left: 10px;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #FFA726;
+            margin-top: 20px;
+        }
+        .toc {
+            background-color: #FFF3E0;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .toc h2 {
+            color: #FF9800;
+            border: none;
+            padding: 0;
+            margin-top: 0;
+        }
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .toc li {
+            padding: 5px 0;
+        }
+        .toc a {
+            color: #FF5722;
+            text-decoration: none;
+        }
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        .note {
+            background-color: #E3F2FD;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .warning {
+            background-color: #FFF9C4;
+            border-left: 4px solid #FFC107;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .step {
+            background-color: #F5F5F5;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        code {
+            background-color: #F5F5F5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #FF9800;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #FFF3E0;
+        }
+        @media print {
+            body {
+                max-width: 100%;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+        }
+        @page {
+            margin: 20mm;
+        }
+    </style>
+</head>
+<body>
+    <h1>消防団記録アプリ 操作マニュアル</h1>
+    <p><strong>バージョン:</strong> 1.0<br>
+    <strong>作成日:</strong> 2026年2月</p>
+
+    <div class="toc">
+        <h2>目次</h2>
+        <ul>
+            <li><a href="#overview">1. アプリの概要</a></li>
+            <li><a href="#getting-started">2. 初期設定</a></li>
+            <li><a href="#member">3. 団員管理</a></li>
+            <li><a href="#dispatch">4. 出動記録</a></li>
+            <li><a href="#accounting">5. 会計管理</a></li>
+            <li><a href="#pdf">6. PDF出力</a></li>
+            <li><a href="#settings">7. 設定</a></li>
+            <li><a href="#tips">8. 便利な機能</a></li>
+        </ul>
+    </div>
+
+    <div class="page-break"></div>
+
+    <h1 id="overview">1. アプリの概要</h1>
+    <p>消防団記録アプリは、消防団の記録管理を効率化するAndroidアプリです。団員名簿、出動記録、会計記録を一元管理し、PDF出力機能により報告資料の作成を簡単に行えます。</p>
+
+    <h2>主な機能</h2>
+    <ul>
+        <li><strong>団員管理</strong> - 団員名簿の登録・編集、役職設定</li>
+        <li><strong>出動記録</strong> - 行事の登録、出席記録の管理</li>
+        <li><strong>会計管理</strong> - 収支の記録、科目管理</li>
+        <li><strong>PDF出力</strong> - 各種帳票のPDF作成</li>
+        <li><strong>年度管理</strong> - 年度ごとのデータ管理、次年度移行</li>
+    </ul>
+
+    <div class="page-break"></div>
+
+    <h1 id="getting-started">2. 初期設定</h1>
+
+    <h2>2.1 年度設定</h2>
+    <div class="step">
+        <strong>手順:</strong>
+        <ol>
+            <li>ホーム画面から「設定」をタップ</li>
+            <li>「年度設定」セクションの「年度設定」ボタンをタップ</li>
+            <li>年度（例: 2026）を入力</li>
+            <li>「設定」ボタンをタップ</li>
+        </ol>
+    </div>
+
+    <div class="note">
+        <strong>📝 Note:</strong> 年度期間は4月1日〜翌年3月31日で自動設定されます。
+    </div>
+
+    <h2>2.2 分団名設定</h2>
+    <div class="step">
+        <strong>手順:</strong>
+        <ol>
+            <li>設定画面の「分団名設定」に分団名を入力</li>
+            <li>「設定を保存」ボタンをタップ</li>
+        </ol>
+    </div>
+
+    <div class="note">
+        <strong>📝 Note:</strong> 分団名はPDF出力時のタイトルに使用されます。
+    </div>
+
+    <div class="page-break"></div>
+
+    <h1 id="member">3. 団員管理</h1>
+
+    <h2>3.1 名簿編集</h2>
+    <div class="step">
+        <strong>手順:</strong>
+        <ol>
+            <li>ホーム画面から「名簿編集」をタップ</li>
+            <li>氏名と電話番号を入力</li>
+            <li>「登録」ボタンをタップ</li>
+        </ol>
+    </div>
+
+    <h3>並び替え機能</h3>
+    <table>
+        <tr>
+            <th>ボタン</th>
+            <th>機能</th>
+        </tr>
+        <tr>
+            <td>五十音順</td>
+            <td>全団員を五十音順に自動ソート</td>
+        </tr>
+        <tr>
+            <td>↑ / ↓</td>
+            <td>フォーカスのある行を上下に移動</td>
+        </tr>
+    </table>
+
+    <div class="note">
+        <strong>📝 Note:</strong> 行を移動するには、移動したい行の氏名または電話番号をタップしてからカーソルを合わせ、上部の↑または↓ボタンをタップします。
+    </div>
+
+    <h2>3.2 役職設定</h2>
+    <div class="step">
+        <strong>手順:</strong>
+        <ol>
+            <li>ホーム画面から「役職設定」をタップ</li>
+            <li>各団員の役職をドロップダウンから選択</li>
+            <li>「保存」ボタンをタップ</li>
+        </ol>
+    </div>
+
+    <h3>役職一覧</h3>
+    <ul>
+        <li>分団長</li>
+        <li>副分団長</li>
+        <li>部長</li>
+        <li>班長</li>
+        <li>団員</li>
+        <li>補助団員</li>
+    </ul>
+
+    <div class="page-break"></div>
+
+    <h1 id="dispatch">4. 出動記録</h1>
+
+    <h2>4.1 行事登録</h2>
+    <div class="step">
+        <strong>手順:</strong>
+        <ol>
+            <li>ホーム画面から「行事登録」をタップ</li>
+            <li>行事名、日付、手当指数を入力</li>
+            <li>「登録」ボタンをタップ</li>
+        </ol>
+    </div>
+
+    <div class="note">
+        <strong>📝 Note:</strong> 手当指数は出動手当の計算に使用されます。通常の出動は1、特別な場合は2以上を設定します。
+    </div>
+
+    <h2>4.2 出席記録</h2>
+    <div class="step">
+        <strong>手順:</strong>
+        <ol>
+            <li>ホーム画面から「出動表」をタップ</li>
+            <li>各行事の出席状況をタップして記録</li>
+            <li>白：欠席、赤：出席</li>
+        </ol>
+    </div>
+
+    <h3>出席記録の見方</h3>
+    <table>
+        <tr>
+            <th>表示</th>
+            <th>意味</th>
+        </tr>
+        <tr>
+            <td>白いセル</td>
+            <td>欠席</td>
+        </tr>
+        <tr>
+            <td>赤いセル</td>
+            <td>出席</td>
+        </tr>
+        <tr>
+            <td>合計列</td>
+            <td>各団員の合計手当指数</td>
+        </tr>
+    </table>
+
+    <div class="note">
+        <strong>📝 Note:</strong> 手当指数の数字は、PDF出力時のみ赤いセル内に表示されます。アプリ画面では赤いセルで出席を表示します。
+    </div>
+
+    <div class="page-break"></div>
+
+    <h1 id="accounting">5. 会計管理</h1>
+
+    <h2>5.1 科目設定</h2>
+    <div class="step">
+        <strong>手順:</strong>
+        <ol>
+            <li>ホーム画面から「会計」→「科目設定」をタップ</li>
+            <li>「収入」または「支出」タブを選択</li>
+            <li>「＋」ボタンで新規科目を追加</li>
+            <li>科目名を入力して「保存」</li>
+        </ol>
+    </div>
+
+    <h3>科目の編集</h3>
+    <ul>
+        <li><strong>編集</strong> - 科目をタップして名前を変更</li>
+        <li><strong>削除</strong> - ゴミ箱アイコンをタップ</li>
+        <li><strong>並び替え</strong> - ↑↓ボタンで順序を変更</li>
+    </ul>
+
+    <h2>5.2 取引記入</h2>
+    <div class="step">
+        <strong>手順:</strong>
+        <ol>
+            <li>ホーム画面から「会計」→「取引記入」をタップ</li>
+            <li>「収入」または「支出」タブを選択</li>
+            <li>「新規」ボタンをタップ</li>
+            <li>日付、科目、金額、メモを入力</li>
+            <li>「保存」ボタンをタップ</li>
+        </ol>
+    </div>
+
+    <h3>取引の編集・削除</h3>
+    <div class="step">
+        <ol>
+            <li>編集または削除したい取引をタップ</li>
+            <li>「編集」または「削除」ボタンをタップ</li>
+        </ol>
+    </div>
+
+    <div class="note">
+        <strong>📝 Note:</strong> メモ欄には取引の詳細を記録できます。メモがある取引は一覧で確認できます。
+    </div>
+
+    <h2>5.3 期首残高（繰越金）設定</h2>
+    <div class="step">
+        <strong>手順:</strong>
+        <ol>
+            <li>ホーム画面から「会計」→「繰越金設定」をタップ</li>
+            <li>期首残高（前年度からの繰越金）を入力</li>
+            <li>「保存」ボタンをタップ</li>
+        </ol>
+    </div>
+
+    <div class="note">
+        <strong>📝 Note:</strong> 期首残高は、前年度の差引残高を入力します。年度の最初に設定することで、正確な残高計算ができます。
+    </div>
+
+    <h3>差引残高の計算式</h3>
+    <p><code>差引残高 = 期首残高 + 収入合計 - 支出合計</code></p>
+
+    <div class="page-break"></div>
+
+    <h1 id="pdf">6. PDF出力</h1>
+
+    <h2>6.1 PDF出力画面</h2>
+    <div class="step">
+        <strong>手順:</strong>
+        <ol>
+            <li>ホーム画面から「PDF出力」をタップ</li>
+            <li>出力したいPDFの種類を選択</li>
+            <li>「プレビュー」ボタンでPDFを確認</li>
+        </ol>
+    </div>
+
+    <h2>6.2 出力可能なPDF</h2>
+
+    <h3>団員名簿</h3>
+    <p>団員の氏名、役職、電話番号を一覧表示します。役職順に並び替えられます。</p>
+
+    <h3>出動表</h3>
+    <p>各団員の出動状況を一覧表示します。行事ごとの出席状況と合計手当指数が表示されます。</p>
+
+    <h3>出動手当</h3>
+    <p>出動手当の計算結果を表示します。1回あたりの支給額を入力すると、各団員の手当金額と紙幣の枚数が計算されます。</p>
+    <div class="step">
+        <strong>手順:</strong>
+        <ol>
+            <li>「出動手当」を選択</li>
+            <li>1回出動の支給額を入力</li>
+            <li>「生成」ボタンをタップ</li>
+        </ol>
+    </div>
+
+    <h3>会計帳簿</h3>
+    <p>収入・支出の集計表を出力します。科目ごとの合計金額、繰越金、差引残高が表示されます。</p>
+
+    <div class="note">
+        <strong>📝 Note:</strong> 取引が0円の科目は集計表に表示されません。
+    </div>
+
+    <div class="page-break"></div>
+
+    <h1 id="settings">7. 設定</h1>
+
+    <h2>7.1 次年度に移行</h2>
+    <div class="step">
+        <strong>手順:</strong>
+        <ol>
+            <li>設定画面の「次年度に移行」セクションへ</li>
+            <li>「次年度に移行」ボタンをタップ</li>
+            <li>バックアップを保存するか選択</li>
+            <li>確認ダイアログで「実行」をタップ</li>
+        </ol>
+    </div>
+
+    <div class="warning">
+        <strong>⚠️ Warning:</strong> 次年度移行を実行すると、出動表データと取引データがクリアされます。必ずバックアップを保存してください。
+    </div>
+
+    <h3>次年度移行で引き継がれるもの</h3>
+    <ul>
+        <li>団員名簿</li>
+        <li>科目設定</li>
+        <li>差引残高（次年度の繰越金として設定）</li>
+    </ul>
+
+    <h3>次年度移行でクリアされるもの</h3>
+    <ul>
+        <li>出動表データ（行事、出席記録）</li>
+        <li>取引データ</li>
+    </ul>
+
+    <h2>7.2 バックアップ</h2>
+
+    <h3>エクスポート</h3>
+    <div class="step">
+        <strong>手順:</strong>
+        <ol>
+            <li>設定画面の「バックアップ」セクションへ</li>
+            <li>「エクスポート」ボタンをタップ</li>
+            <li>保存場所を選択</li>
+        </ol>
+    </div>
+
+    <h3>インポート</h3>
+    <div class="step">
+        <strong>手順:</strong>
+        <ol>
+            <li>設定画面の「バックアップ」セクションへ</li>
+            <li>「インポート」ボタンをタップ</li>
+            <li>バックアップファイルを選択</li>
+        </ol>
+    </div>
+
+    <div class="warning">
+        <strong>⚠️ Warning:</strong> インポートすると、現在のデータは上書きされます。
+    </div>
+
+    <h2>7.3 その他の設定</h2>
+
+    <h3>背景色設定</h3>
+    <p>各画面の背景色をカスタマイズできます。</p>
+
+    <h3>名簿から電話発信を許可</h3>
+    <p>ONにすると、団員名簿の電話番号をタップして電話をかけることができます。</p>
+
+    <h3>データ初期化</h3>
+    <div class="warning">
+        <strong>⚠️ Warning:</strong> データ初期化は取り消せません。必ずバックアップを取ってから実行してください。
+    </div>
+    <ul>
+        <li><strong>行事データ初期化</strong> - 行事と出席記録を削除</li>
+        <li><strong>取引データ初期化</strong> - 取引記録を削除</li>
+        <li><strong>全データ初期化</strong> - すべてのデータを削除</li>
+    </ul>
+
+    <div class="page-break"></div>
+
+    <h1 id="tips">8. 便利な機能</h1>
+
+    <h2>8.1 名簿編集のコツ</h2>
+    <ul>
+        <li>五十音順ボタンで一括ソートすると、探しやすくなります</li>
+        <li>音読みでソートされるため、実際の読み方と異なる場合は↑↓ボタンで調整してください</li>
+        <li>20行まで入力可能です</li>
+    </ul>
+
+    <h2>8.2 出席記録のコツ</h2>
+    <ul>
+        <li>セルをタップすると出席/欠席が切り替わります</li>
+        <li>赤いセルが出席を表示し、PDF出力時には手当指数の数字が表示されます</li>
+        <li>合計列で各団員の年間出動状況が確認できます</li>
+    </ul>
+
+    <h2>8.3 会計記録のコツ</h2>
+    <ul>
+        <li>科目は出力順序を設定できるので、よく使う科目を上に配置すると便利です</li>
+        <li>メモ欄には支払先や用途を記録しておくと後で確認しやすくなります</li>
+        <li>補助科目を使うと、さらに細かく分類できます</li>
+    </ul>
+
+    <h2>8.4 PDF出力のコツ</h2>
+    <ul>
+        <li>プレビューボタンで内容を確認してから保存できます</li>
+        <li>出力したPDFは他のアプリで開いたり、印刷したりできます</li>
+        <li>会計帳簿は年度末の報告資料として活用できます</li>
+    </ul>
+
+    <div class="page-break"></div>
+
+    <h2>9. トラブルシューティング</h2>
+
+    <h3>データが表示されない</h3>
+    <ul>
+        <li>年度が設定されているか確認してください</li>
+        <li>アプリを再起動してみてください</li>
+    </ul>
+
+    <h3>PDFが開けない</h3>
+    <ul>
+        <li>PDFビューアーアプリがインストールされているか確認してください</li>
+        <li>ファイルが正しく保存されているか確認してください</li>
+    </ul>
+
+    <h3>バックアップから復元できない</h3>
+    <ul>
+        <li>バックアップファイルが破損していないか確認してください</li>
+        <li>正しいJSON形式のファイルか確認してください</li>
+    </ul>
+
+    <hr>
+
+    <p style="text-align: center; margin-top: 50px; color: #999;">
+        消防団記録アプリ v1.0<br>
+        © 2026
+    </p>
+</body>
+</html>

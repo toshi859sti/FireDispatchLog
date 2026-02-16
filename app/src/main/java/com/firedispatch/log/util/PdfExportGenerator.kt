@@ -1117,17 +1117,21 @@ class PdfExportGenerator {
                     it.categoryId == category.id && it.isIncome == 1
                 }
                 val categoryTotal = categoryTransactions.sumOf { it.amount }
-                incomeTotal += categoryTotal
 
-                // 科目名と金額
-                canvas.drawText(category.name, PAGE_MARGIN + 20f, currentY, cellPaint)
-                canvas.drawText(
-                    "¥${String.format("%,d", categoryTotal)}",
-                    A4_WIDTH - PAGE_MARGIN - 100f,
-                    currentY,
-                    cellPaint
-                )
-                currentY += 25f
+                // 0円の科目はスキップ
+                if (categoryTotal > 0) {
+                    incomeTotal += categoryTotal
+
+                    // 科目名と金額
+                    canvas.drawText(category.name, PAGE_MARGIN + 20f, currentY, cellPaint)
+                    canvas.drawText(
+                        "¥${String.format("%,d", categoryTotal)}",
+                        A4_WIDTH - PAGE_MARGIN - 100f,
+                        currentY,
+                        cellPaint
+                    )
+                    currentY += 25f
+                }
             }
 
             // 収入合計
@@ -1154,17 +1158,21 @@ class PdfExportGenerator {
                     it.categoryId == category.id && it.isIncome == 0
                 }
                 val categoryTotal = categoryTransactions.sumOf { it.amount }
-                expenseTotal += categoryTotal
 
-                // 科目名と金額
-                canvas.drawText(category.name, PAGE_MARGIN + 20f, currentY, cellPaint)
-                canvas.drawText(
-                    "¥${String.format("%,d", categoryTotal)}",
-                    A4_WIDTH - PAGE_MARGIN - 100f,
-                    currentY,
-                    cellPaint
-                )
-                currentY += 25f
+                // 0円の科目はスキップ
+                if (categoryTotal > 0) {
+                    expenseTotal += categoryTotal
+
+                    // 科目名と金額
+                    canvas.drawText(category.name, PAGE_MARGIN + 20f, currentY, cellPaint)
+                    canvas.drawText(
+                        "¥${String.format("%,d", categoryTotal)}",
+                        A4_WIDTH - PAGE_MARGIN - 100f,
+                        currentY,
+                        cellPaint
+                    )
+                    currentY += 25f
+                }
             }
 
             // 支出合計

@@ -9,12 +9,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -53,6 +57,7 @@ fun MemberEditScreen(
     viewModel: MemberEditViewModel = viewModel()
 ) {
     val editRows by viewModel.editRows.collectAsState()
+    val focusedRowIndex by viewModel.focusedRowIndex.collectAsState()
     var showErrorDialog by remember { mutableStateOf(false) }
 
     LiquidGlassBackground(
@@ -94,37 +99,115 @@ fun MemberEditScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // 登録ボタン（ガラススタイル）
-            Box(
+            // ボタン行（五十音順、↑、↓、登録）
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color.White.copy(alpha = 0.5f))
-                    .border(
-                        width = 1.dp,
-                        color = Color.White.copy(alpha = 0.4f),
-                        shape = RoundedCornerShape(16.dp)
-                    )
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Button(
-                    onClick = {
-                        if (viewModel.hasInvalidRows()) {
-                            showErrorDialog = true
-                        } else {
-                            viewModel.saveMembers {
-                                navController.navigateUp()
-                            }
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent,
-                        contentColor = Color.Black
-                    ),
-                    shape = RoundedCornerShape(16.dp)
+                // 五十音順ソートボタン
+                Box(
+                    modifier = Modifier
+                        .weight(1.5f)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.White.copy(alpha = 0.5f))
+                        .border(
+                            width = 1.dp,
+                            color = Color.White.copy(alpha = 0.4f),
+                            shape = RoundedCornerShape(16.dp)
+                        )
                 ) {
-                    Text("登録", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Button(
+                        onClick = { viewModel.sortByName() },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color.Black
+                        ),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text("五十音順", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    }
+                }
+
+                // ↑ボタン
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.White.copy(alpha = 0.5f))
+                        .border(
+                            width = 1.dp,
+                            color = Color.White.copy(alpha = 0.4f),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                ) {
+                    IconButton(
+                        onClick = { viewModel.moveFocusedRowUp() },
+                        enabled = focusedRowIndex != null && focusedRowIndex!! > 0
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowUp,
+                            contentDescription = "上へ",
+                            tint = Color.Black
+                        )
+                    }
+                }
+
+                // ↓ボタン
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.White.copy(alpha = 0.5f))
+                        .border(
+                            width = 1.dp,
+                            color = Color.White.copy(alpha = 0.4f),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                ) {
+                    IconButton(
+                        onClick = { viewModel.moveFocusedRowDown() },
+                        enabled = focusedRowIndex != null && focusedRowIndex!! < editRows.size - 1
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = "下へ",
+                            tint = Color.Black
+                        )
+                    }
+                }
+
+                // 登録ボタン
+                Box(
+                    modifier = Modifier
+                        .weight(1.5f)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.White.copy(alpha = 0.5f))
+                        .border(
+                            width = 1.dp,
+                            color = Color.White.copy(alpha = 0.4f),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                ) {
+                    Button(
+                        onClick = {
+                            if (viewModel.hasInvalidRows()) {
+                                showErrorDialog = true
+                            } else {
+                                viewModel.saveMembers {
+                                    navController.navigateUp()
+                                }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color.Black
+                        ),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text("登録", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    }
                 }
             }
 
@@ -167,6 +250,11 @@ fun MemberEditScreen(
                         },
                         onPhoneNumberChange = { phoneNumber ->
                             viewModel.updateRow(index, row.name, phoneNumber)
+                        },
+                        onFocusChanged = { hasFocus ->
+                            if (hasFocus) {
+                                viewModel.setFocusedRow(index)
+                            }
                         }
                     )
                 }
@@ -195,7 +283,8 @@ fun MemberEditRow(
     name: String,
     phoneNumber: String,
     onNameChange: (String) -> Unit,
-    onPhoneNumberChange: (String) -> Unit
+    onPhoneNumberChange: (String) -> Unit,
+    onFocusChanged: (Boolean) -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -206,7 +295,10 @@ fun MemberEditRow(
             onValueChange = onNameChange,
             modifier = Modifier
                 .weight(1f)
-                .background(Color.White.copy(alpha = 0.95f), RoundedCornerShape(8.dp)),
+                .background(Color.White.copy(alpha = 0.95f), RoundedCornerShape(8.dp))
+                .onFocusChanged { focusState ->
+                    onFocusChanged(focusState.isFocused)
+                },
             singleLine = true,
             placeholder = { Text("${index + 1}", fontSize = 20.sp) },
             textStyle = androidx.compose.ui.text.TextStyle(fontSize = 20.sp),
@@ -220,7 +312,10 @@ fun MemberEditRow(
             onValueChange = onPhoneNumberChange,
             modifier = Modifier
                 .weight(1f)
-                .background(Color.White.copy(alpha = 0.95f), RoundedCornerShape(8.dp)),
+                .background(Color.White.copy(alpha = 0.95f), RoundedCornerShape(8.dp))
+                .onFocusChanged { focusState ->
+                    onFocusChanged(focusState.isFocused)
+                },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
             placeholder = { Text("-", fontSize = 20.sp) },

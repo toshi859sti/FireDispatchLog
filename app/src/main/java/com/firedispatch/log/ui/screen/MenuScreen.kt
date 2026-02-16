@@ -83,6 +83,11 @@ fun MenuScreen(navController: NavController) {
                         text = "設定",
                         onClick = { navController.navigate(Screen.Settings.route) }
                     )
+
+                    MenuButton(
+                        text = "マニュアル",
+                        onClick = { navController.navigate(Screen.Manual.route) }
+                    )
                 }
             }
         }
